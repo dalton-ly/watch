@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "i2c.h": "c",
+        "main.h": "c",
+        "dma.h": "c",
+        "app_menu.h": "c",
+        "sys.h": "c",
+        "includes.h": "c"
+    }
+}

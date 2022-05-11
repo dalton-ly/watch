@@ -19,6 +19,30 @@ static int8_t id = -1;					 //菜单id，默认为时间界面
 
 static AngleGyro_TypeDef *ag_t;
 
+//定义按键
+#define SW1 GPIO_PIN_10;
+#define SW1 GPIO_PIN_13;
+#define SW1 GPIO_PIN_14;
+#define SW1_PORT GPIOA;
+#define SW23_PORT GPIOb;
+
+//按键检测函数
+
+uint8_t Key_Scan(GPIO_TypeDef *GPIOx,uint16_t GPIO_PIN)
+{
+    if (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 1)
+    {
+        /* code */
+        while (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 1)
+            ;
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }   
+}
+
 void Power_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -37,7 +61,8 @@ void Power_Init(void)
 	GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	Power_On();
+	//Power_on();//PA0 和PA1设置为1
+	Power_Off();//PA0 和PA1设置为1
 }
 
 int main(void)
@@ -48,11 +73,11 @@ int main(void)
 	Stm32_Clock_Init(200, 25, 2, 4); //设置时钟,100Mhz
 	HAL_Init();						 //初始化HAL库
 	delay_init(100);				 //初始化延时函数
-	LED_Init();						 //初始化LED
+	LED_Init();						 //初始化LED 或许可以去除？
 	LCD_Init();						 //初始化LCD
 	Power_Init();					 //初始化电源控制
 	Bat_ADC_Init();					 //初始化ADC
-	PCF8563_I2C_Init();				 //PCF8563初始化
+	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
 	Kalman_Init();					 //卡尔曼参数初始化
 	MPU9250_Init();					 //MPU9250初始化
 
@@ -68,7 +93,7 @@ int main(void)
 				 (CPU_CHAR *)"start task",												  //任务名字
 				 (OS_TASK_PTR)start_task,												  //任务函数
 				 (void *)0,																  //传递给任务函数的参数
-				 (OS_PRIO)START_TASK_PRIO,												  //任务优先级
+				 (OS_PRIO)START_TASK_PRIO,												  //任务优先级3
 				 (CPU_STK *)&START_TASK_STK[0],											  //任务堆栈基地址
 				 (CPU_STK_SIZE)START_STK_SIZE / 10,										  //任务堆栈深度限位
 				 (CPU_STK_SIZE)START_STK_SIZE,											  //任务堆栈大小
@@ -79,10 +104,12 @@ int main(void)
 				 (OS_ERR *)&err);														  //存放该函数错误时的返回值
 	OS_CRITICAL_EXIT();																	  //退出临界区
 
-	OSStart(&err); //开启UCOSIII
+	OSStart(&err); //开启UCOSIII 发生一次调度 即执行开始任务
 	while (1)
 		;
 }
+
+
 
 //开始任务函数
 void start_task(void *p_arg)
@@ -112,7 +139,7 @@ void start_task(void *p_arg)
 				 (CPU_CHAR *)"lvgl task",
 				 (OS_TASK_PTR)lvgl_task,
 				 (void *)0,
-				 (OS_PRIO)LVGL_TASK_PRIO,
+				 (OS_PRIO)LVGL_TASK_PRIO,		//优先级6
 				 (CPU_STK *)&LVGL_TASK_STK[0],
 				 (CPU_STK_SIZE)LVGL_STK_SIZE / 10,
 				 (CPU_STK_SIZE)LVGL_STK_SIZE,
@@ -123,7 +150,7 @@ void start_task(void *p_arg)
 				 (OS_ERR *)&err);
 	OS_CRITICAL_EXIT(); //退出临界区
 
-	OS_TaskSuspend((OS_TCB *)&StartTaskTCB, &err); //挂起开始任务
+	OS_TaskSuspend((OS_TCB *)&StartTaskTCB, &err); //挂起开始任务 发生调度进入lvgltask，后续没有执行resume的话开始任务不会再被执行
 }
 
 //创建一些跟APP有关的任务
@@ -138,7 +165,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"move task",
 				 (OS_TASK_PTR)move_task,
 				 (void *)0,
-				 (OS_PRIO)MOVE_TASK_PRIO,
+				 (OS_PRIO)MOVE_TASK_PRIO,		//10
 				 (CPU_STK *)&MOVE_TASK_STK[0],
 				 (CPU_STK_SIZE)MOVE_STK_SIZE / 10,
 				 (CPU_STK_SIZE)MOVE_STK_SIZE,
@@ -152,7 +179,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"time task",
 				 (OS_TASK_PTR)time_task,
 				 (void *)0,
-				 (OS_PRIO)TIME_TASK_PRIO,
+				 (OS_PRIO)TIME_TASK_PRIO,		//12
 				 (CPU_STK *)&TIME_TASK_STK[0],
 				 (CPU_STK_SIZE)TIME_STK_SIZE / 10,
 				 (CPU_STK_SIZE)TIME_STK_SIZE,
@@ -166,7 +193,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"led0 task",
 				 (OS_TASK_PTR)led0_task,
 				 (void *)0,
-				 (OS_PRIO)LED0_TASK_PRIO,
+				 (OS_PRIO)LED0_TASK_PRIO,		//15
 				 (CPU_STK *)&LED0_TASK_STK[0],
 				 (CPU_STK_SIZE)LED0_STK_SIZE / 10,
 				 (CPU_STK_SIZE)LED0_STK_SIZE,
@@ -180,7 +207,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"bat task",
 				 (OS_TASK_PTR)bat_task,
 				 (void *)0,
-				 (OS_PRIO)BAT_TASK_PRIO,
+				 (OS_PRIO)BAT_TASK_PRIO,		//9
 				 (CPU_STK *)&BAT_TASK_STK[0],
 				 (CPU_STK_SIZE)BAT_STK_SIZE / 10,
 				 (CPU_STK_SIZE)BAT_STK_SIZE,
@@ -194,7 +221,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"imu task",
 				 (OS_TASK_PTR)imu_task,
 				 (void *)0,
-				 (OS_PRIO)IMU_TASK_PRIO,
+				 (OS_PRIO)IMU_TASK_PRIO,		//5
 				 (CPU_STK *)&IMU_TASK_STK[0],
 				 (CPU_STK_SIZE)IMU_STK_SIZE / 10,
 				 (CPU_STK_SIZE)IMU_STK_SIZE,
@@ -208,7 +235,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"compass task",
 				 (OS_TASK_PTR)compass_task,
 				 (void *)0,
-				 (OS_PRIO)COMPASS_TASK_PRIO,
+				 (OS_PRIO)COMPASS_TASK_PRIO,		//7
 				 (CPU_STK *)&COMPASS_TASK_STK[0],
 				 (CPU_STK_SIZE)COMPASS_STK_SIZE / 10,
 				 (CPU_STK_SIZE)COMPASS_STK_SIZE,
@@ -222,7 +249,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"temperature task",
 				 (OS_TASK_PTR)temperature_task,
 				 (void *)0,
-				 (OS_PRIO)TEMPERATURE_TASK_PRIO,
+				 (OS_PRIO)TEMPERATURE_TASK_PRIO,		//8
 				 (CPU_STK *)&TEMPERATURE_TASK_STK[0],
 				 (CPU_STK_SIZE)TEMPERATURE_STK_SIZE / 10,
 				 (CPU_STK_SIZE)TEMPERATURE_STK_SIZE,
@@ -233,7 +260,7 @@ void APP_TaskCreate(void)
 				 (OS_ERR *)&err);
 	//创建息屏控制软件定时器
 	OSTmrCreate(&display_timer, "display timer", 900, 0, OS_OPT_TMR_ONE_SHOT, display_tim_callback, NULL, &err);
-	OS_TaskSuspend((OS_TCB *)&CompassTaskTCB, &err); //挂起COMPASS任务
+	OS_TaskSuspend((OS_TCB *)&CompassTaskTCB, &err); //挂起COMPASS任务 发生调度 
 	IWatchDog_Init();		//独立看门狗初始化
 	OS_CRITICAL_EXIT(); //退出临界区
 }
@@ -270,7 +297,7 @@ void lvgl_task(void *p_arg)
 
 	lv_task_handler(); //LVGL更新显示
 
-	OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); //延时1S
+	OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); //延时1S 这里是不是会发生一次调度？ 但是此时没有别的任务不影响
 	app_del_start();										  //删除开机图片
 
 	app_digital_clock_create(); //创建数字表盘
@@ -282,7 +309,7 @@ void lvgl_task(void *p_arg)
 	ag_t = Get_Angle_GyroxStructure();
 	
 	APP_TaskCreate(); //创建一些任务
-
+	
 	OSTmrStart(&display_timer, &err);
 
 	while (1)

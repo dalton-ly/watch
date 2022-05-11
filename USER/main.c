@@ -21,10 +21,10 @@ static AngleGyro_TypeDef *ag_t;
 
 //定义按键
 #define SW1 GPIO_PIN_10;
-#define SW1 GPIO_PIN_13;
-#define SW1 GPIO_PIN_14;
+#define SW2 GPIO_PIN_13;
+#define SW3 GPIO_PIN_14;
 #define SW1_PORT GPIOA;
-#define SW23_PORT GPIOb;
+#define SW23_PORT GPIOB;
 
 //按键检测函数
 
@@ -62,8 +62,26 @@ void Power_Init(void)
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	//Power_on();//PA0 和PA1设置为1
-	Power_Off();//PA0 和PA1设置为1
+	Power_Off();//按键断开就关机
 }
+
+
+void SW_Init(void)//按键引脚初始化
+{
+	GPIO_InitTypeDef GPIO_InitStructure_SW1;
+	GPIO_InitTypeDef GPIO_InitStructure_SW2;
+
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	GPIO_InitStructure_SW1.Mode=GPIO_MODE_INPUT;
+	GPIO_InitStructure_SW1.Pin = GPIO_PIN_10;
+	GPIO_InitStructure_SW2.Mode=GPIO_MODE_INPUT;
+	GPIO_InitStructure_SW2.Pin = GPIO_PIN_13 | GPIO_PIN_14;	
+	HAL_GPIO_Init(SW1_PORT,GPIO_InitStructure_SW1);
+	HAL_GPIO_Init(SW23_PORT,GPIO_InitStructure_SW2);
+}
+
+
 
 int main(void)
 {
@@ -80,7 +98,7 @@ int main(void)
 	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
 	Kalman_Init();					 //卡尔曼参数初始化
 	MPU9250_Init();					 //MPU9250初始化
-
+	SW_Init();
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
 	lv_init();			 //lvgl 系统初始化
@@ -393,14 +411,15 @@ void move_task(void *p_arg)
 {
 	OS_ERR err;
 	Move_DirTypeDef dir;
+	//int dir=0;
 
 	p_arg = p_arg;
 
 	while (1)
 	{
-		dir = Move_Scan(); //姿态扫描
-
-		if (dir != MOVE_NONE)
+		//dir = Move_Scan(); //姿态扫描
+		dir=which_key();
+		if (dir == MOVE_NONE)
 			OSTmrStart(&display_timer, &err); //重新启动定时器计时
 
 		switch (Disp)
@@ -505,7 +524,7 @@ static void move_task_menu_change_display(Display_TypeDef disp_t)
 }
 
 //当前界面是菜单时MOVE任务要做的事情
-static void move_task_menu(Move_DirTypeDef dir)
+static void move_task_menu(int dir)
 {
 	switch (dir)
 	{
@@ -658,4 +677,27 @@ static Move_DirTypeDef Move_Scan(void)
 	else
 		return MOVE_NONE;
 }
+//新建一个按键读取按键 返回哪个按键被按下
+static int which_key(void)
+{
+	if (Key_Scan(SW1_PORT,SW1)==0)
+	{
+		return MOVE_LEFT;
+	}
+	else if (Key_Scan(SW23_PORT,SW2)==0)
+	{
+		return MOVE_RIGHT;
+	}
+	else if (Key_Scan(SW23_PORT,SW3)==0)
+	{
+		return MOVE_UP;
+	}
+	else if (Key_Scan(SW1_PORT,SW1)==0 && Key_Scan(SW23_PORT,SW2)==0)
+	{
+		return MOVE_DOWN ;
+	}
+	else 
+	return MOVE_NONE;		
+}
+
 

@@ -20,11 +20,11 @@ static int8_t id = -1;					 //菜单id，默认为时间界面
 static AngleGyro_TypeDef *ag_t;
 
 //定义按键
-#define SW1 GPIO_PIN_10;
-#define SW2 GPIO_PIN_13;
-#define SW3 GPIO_PIN_14;
-#define SW1_PORT GPIOA;
-#define SW23_PORT GPIOB;
+#define SW1 GPIO_PIN_10
+#define SW2 GPIO_PIN_13
+#define SW3 GPIO_PIN_14
+#define SW1_PORT GPIOA
+#define SW23_PORT GPIOB
 
 //按键检测函数
 

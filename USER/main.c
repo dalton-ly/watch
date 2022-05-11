@@ -61,8 +61,8 @@ void Power_Init(void)
 	GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	//Power_on();//PA0 和PA1设置为1
-	Power_Off();//按键断开就关机
+	Power_On();//PA0 和PA1设置为1
+	//Power_Off();//按键断开就关机
 }
 
 
@@ -75,10 +75,14 @@ void SW_Init(void)//按键引脚初始化
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	GPIO_InitStructure_SW1.Mode=GPIO_MODE_INPUT;
 	GPIO_InitStructure_SW1.Pin = GPIO_PIN_10;
+	GPIO_InitStructure_SW1.Pull=GPIO_NOPULL;
+
+	
 	GPIO_InitStructure_SW2.Mode=GPIO_MODE_INPUT;
 	GPIO_InitStructure_SW2.Pin = GPIO_PIN_13 | GPIO_PIN_14;	
-	HAL_GPIO_Init(SW1_PORT,GPIO_InitStructure_SW1);
-	HAL_GPIO_Init(SW23_PORT,GPIO_InitStructure_SW2);
+	GPIO_InitStructure_SW2.Pull=GPIO_NOPULL;
+	HAL_GPIO_Init(SW1_PORT, &GPIO_InitStructure_SW1);
+	HAL_GPIO_Init(SW23_PORT, &GPIO_InitStructure_SW2);
 }
 
 
@@ -524,7 +528,7 @@ static void move_task_menu_change_display(Display_TypeDef disp_t)
 }
 
 //当前界面是菜单时MOVE任务要做的事情
-static void move_task_menu(int dir)
+static void move_task_menu(Move_DirTypeDef dir)
 {
 	switch (dir)
 	{
@@ -678,7 +682,7 @@ static Move_DirTypeDef Move_Scan(void)
 		return MOVE_NONE;
 }
 //新建一个按键读取按键 返回哪个按键被按下
-static int which_key(void)
+static Move_DirTypeDef which_key(void)
 {
 	if (Key_Scan(SW1_PORT,SW1)==0)
 	{

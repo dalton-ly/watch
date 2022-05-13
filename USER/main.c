@@ -30,16 +30,17 @@ static AngleGyro_TypeDef *ag_t;
 
 uint8_t Key_Scan(GPIO_TypeDef *GPIOx,uint16_t GPIO_PIN)
 {
-    if (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 1)
+    if (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 0)
     {
-        /* code */
-        while (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 1)
-            ;
-        return 1;
+        delay_ms(10);
+        if(HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 0)
+		{
+			return 0;
+		}
     }
     else
     {
-        return 0;
+        return 1;
     }   
 }
 
@@ -76,11 +77,13 @@ void SW_Init(void)//按键引脚初始化
 	GPIO_InitStructure_SW1.Mode=GPIO_MODE_INPUT;
 	GPIO_InitStructure_SW1.Pin = GPIO_PIN_10;
 	GPIO_InitStructure_SW1.Pull=GPIO_NOPULL;
+	GPIO_InitStructure_SW1.Speed = GPIO_SPEED_HIGH;
 
 	
 	GPIO_InitStructure_SW2.Mode=GPIO_MODE_INPUT;
 	GPIO_InitStructure_SW2.Pin = GPIO_PIN_13 | GPIO_PIN_14;	
 	GPIO_InitStructure_SW2.Pull=GPIO_NOPULL;
+	GPIO_InitStructure_SW2.Speed = GPIO_SPEED_HIGH;
 	HAL_GPIO_Init(SW1_PORT, &GPIO_InitStructure_SW1);
 	HAL_GPIO_Init(SW23_PORT, &GPIO_InitStructure_SW2);
 }
@@ -290,7 +293,7 @@ void APP_TaskCreate(void)
 //息屏控制软件定时器
 void display_tim_callback(void *p_tmr, void *p_arg)
 {
-	Power_Off();
+	//Power_Off();
 }
 
 //IMU任务，优先级3

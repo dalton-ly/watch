@@ -29,18 +29,21 @@ static AngleGyro_TypeDef *ag_t;
 
 //按键检测函数
 
-uint8_t Key_Scan(GPIO_TypeDef *GPIOx,uint16_t GPIO_PIN)
+GPIO_PinState Key_Scan(GPIO_TypeDef *GPIOx,uint16_t GPIO_PIN)
 {
-    if (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 0)
+    if (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == GPIO_PIN_RESET)
     {
-		while (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 0)
-		{
+		delay_ms(10);
+		if (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == GPIO_PIN_RESET)
+		{	
+			return GPIO_PIN_RESET;
 		}
-			return 0;
+		else
+		return GPIO_PIN_SET;
     }
     else
     {
-        return 1;
+        return GPIO_PIN_SET;
     }   
 }
 
@@ -75,14 +78,14 @@ void SW_Init(void)//按键引脚初始化
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	GPIO_InitStructure_SW1.Mode=GPIO_MODE_INPUT;
 	GPIO_InitStructure_SW1.Pin = GPIO_PIN_10;
-	GPIO_InitStructure_SW1.Pull=GPIO_NOPULL;
-	GPIO_InitStructure_SW1.Speed = GPIO_SPEED_HIGH;
+	GPIO_InitStructure_SW1.Pull=GPIO_PULLUP;
+	//GPIO_InitStructure_SW1.Speed = GPIO_SPEED_HIGH;
 
 	
 	GPIO_InitStructure_SW2.Mode=GPIO_MODE_INPUT;
 	GPIO_InitStructure_SW2.Pin = GPIO_PIN_14 | GPIO_PIN_15;	
-	GPIO_InitStructure_SW2.Pull=GPIO_NOPULL;
-	GPIO_InitStructure_SW2.Speed = GPIO_SPEED_HIGH;
+	GPIO_InitStructure_SW2.Pull=GPIO_PULLUP;
+	//GPIO_InitStructure_SW2.Speed = GPIO_SPEED_HIGH;
 	HAL_GPIO_Init(SW1_PORT, &GPIO_InitStructure_SW1);
 	HAL_GPIO_Init(SW23_PORT, &GPIO_InitStructure_SW2);
 }
@@ -93,14 +96,14 @@ int main(void)
 {
 	OS_ERR err;
 	CPU_SR_ALLOC();
-
+	Move_DirTypeDef dir1;
 	Stm32_Clock_Init(200, 25, 2, 4); //设置时钟,100Mhz
 	HAL_Init();						 //初始化HAL库
 	delay_init(100);				 //初始化延时函数
-	LED_Init();						 //初始化LED 或许可以去除？
-	SW_Init();	
-	LCD_Init();						 //初始化LCD
 	Power_Init();					 //初始化电源控制
+	LED_Init();						 //初始化LED 或许可以去除？
+	LCD_Init();						 //初始化LCD
+	SW_Init();	
 	Bat_ADC_Init();					 //初始化ADC
 	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
 	Kalman_Init();					 //卡尔曼参数初始化
@@ -684,19 +687,19 @@ static Move_DirTypeDef Move_Scan(void)
 //新建一个按键读取按键 返回哪个按键被按下
 static Move_DirTypeDef which_key(void)
 {
-	if (Key_Scan(SW1_PORT,SW1)==0)
+	if (Key_Scan(SW1_PORT,SW1)==GPIO_PIN_RESET)
 	{
 		return MOVE_LEFT;
 	}
-	else if (Key_Scan(SW23_PORT,SW2)==0)
+	else if (Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)
 	{
 		return MOVE_RIGHT;
 	}
-	else if (Key_Scan(SW23_PORT,SW3)==0)
+	else if (Key_Scan(SW23_PORT,SW3)==GPIO_PIN_RESET)
 	{
 		return MOVE_UP;
 	}
-	else if (Key_Scan(SW1_PORT,SW1)==0 && Key_Scan(SW23_PORT,SW2)==0)
+	else if (Key_Scan(SW1_PORT,SW1)==GPIO_PIN_RESET && Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)
 	{
 		return MOVE_DOWN;
 	}

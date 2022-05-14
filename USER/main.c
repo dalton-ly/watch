@@ -12,6 +12,7 @@ static void move_task_menu_change_display(Display_TypeDef disp_t);
 static void move_task_about(Move_DirTypeDef dir);
 static void move_task_setting(Move_DirTypeDef dir);
 static void move_task_compass(Move_DirTypeDef dir);
+static Move_DirTypeDef which_key(void);
 static Move_DirTypeDef Move_Scan(void);
 
 static Display_TypeDef Disp = Disp_Menu; //当前界面
@@ -21,8 +22,8 @@ static AngleGyro_TypeDef *ag_t;
 
 //定义按键
 #define SW1 GPIO_PIN_10
-#define SW2 GPIO_PIN_13
-#define SW3 GPIO_PIN_14
+#define SW2 GPIO_PIN_14
+#define SW3 GPIO_PIN_15
 #define SW1_PORT GPIOA
 #define SW23_PORT GPIOB
 
@@ -32,11 +33,10 @@ uint8_t Key_Scan(GPIO_TypeDef *GPIOx,uint16_t GPIO_PIN)
 {
     if (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 0)
     {
-        delay_ms(10);
-        if(HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 0)
+		while (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == 0)
 		{
-			return 0;
 		}
+			return 0;
     }
     else
     {
@@ -63,7 +63,6 @@ void Power_Init(void)
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	Power_On();//PA0 和PA1设置为1
-	//Power_Off();//按键断开就关机
 }
 
 
@@ -81,7 +80,7 @@ void SW_Init(void)//按键引脚初始化
 
 	
 	GPIO_InitStructure_SW2.Mode=GPIO_MODE_INPUT;
-	GPIO_InitStructure_SW2.Pin = GPIO_PIN_13 | GPIO_PIN_14;	
+	GPIO_InitStructure_SW2.Pin = GPIO_PIN_14 | GPIO_PIN_15;	
 	GPIO_InitStructure_SW2.Pull=GPIO_NOPULL;
 	GPIO_InitStructure_SW2.Speed = GPIO_SPEED_HIGH;
 	HAL_GPIO_Init(SW1_PORT, &GPIO_InitStructure_SW1);
@@ -99,13 +98,13 @@ int main(void)
 	HAL_Init();						 //初始化HAL库
 	delay_init(100);				 //初始化延时函数
 	LED_Init();						 //初始化LED 或许可以去除？
+	SW_Init();	
 	LCD_Init();						 //初始化LCD
 	Power_Init();					 //初始化电源控制
 	Bat_ADC_Init();					 //初始化ADC
 	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
 	Kalman_Init();					 //卡尔曼参数初始化
 	MPU9250_Init();					 //MPU9250初始化
-	SW_Init();
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
 	lv_init();			 //lvgl 系统初始化
@@ -293,7 +292,7 @@ void APP_TaskCreate(void)
 //息屏控制软件定时器
 void display_tim_callback(void *p_tmr, void *p_arg)
 {
-	//Power_Off();
+	Power_Off();
 }
 
 //IMU任务，优先级3
@@ -418,8 +417,6 @@ void move_task(void *p_arg)
 {
 	OS_ERR err;
 	Move_DirTypeDef dir;
-	//int dir=0;
-
 	p_arg = p_arg;
 
 	while (1)
@@ -701,7 +698,7 @@ static Move_DirTypeDef which_key(void)
 	}
 	else if (Key_Scan(SW1_PORT,SW1)==0 && Key_Scan(SW23_PORT,SW2)==0)
 	{
-		return MOVE_DOWN ;
+		return MOVE_DOWN;
 	}
 	else 
 	return MOVE_NONE;		

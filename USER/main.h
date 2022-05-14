@@ -42,7 +42,7 @@ typedef enum
 	MOVE_DOWN
 } Move_DirTypeDef;
 
-static Move_DirTypeDef which_key();
+static Move_DirTypeDef which_key(void);
 
 #define Power_Off() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0 | GPIO_PIN_1, GPIO_PIN_RESET)
 #define Power_On() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0 | GPIO_PIN_1, GPIO_PIN_SET)

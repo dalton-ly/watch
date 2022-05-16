@@ -5,6 +5,7 @@
         "dma.h": "c",
         "app_menu.h": "c",
         "sys.h": "c",
-        "includes.h": "c"
+        "includes.h": "c",
+        "app_anim.h": "c"
     }
 }

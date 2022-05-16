@@ -112,7 +112,6 @@ short MPU_Get_Temperature(void)
 	raw = ((u16)buf[0] << 8) | buf[1];
 	temp = 21 + ((double)raw) / 333.87;
 	return temp * 100;
-	;
 }
 //得到陀螺仪值(原始值)
 //gx,gy,gz:陀螺仪x,y,z轴的原始读数(带符号)

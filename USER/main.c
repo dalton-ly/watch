@@ -71,8 +71,8 @@ void Power_Init(void)
 
 void SW_Init(void)//按键引脚初始化
 {
-	GPIO_InitTypeDef GPIO_InitStructure_SW1;
-	GPIO_InitTypeDef GPIO_InitStructure_SW2;
+	GPIO_InitTypeDef GPIO_InitStructure_SW1={0};
+	GPIO_InitTypeDef GPIO_InitStructure_SW2={0};
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
@@ -96,7 +96,6 @@ int main(void)
 {
 	OS_ERR err;
 	CPU_SR_ALLOC();
-	Move_DirTypeDef dir1;
 	Stm32_Clock_Init(200, 25, 2, 4); //设置时钟,100Mhz
 	HAL_Init();						 //初始化HAL库
 	delay_init(100);				 //初始化延时函数
@@ -424,7 +423,7 @@ void move_task(void *p_arg)
 
 	while (1)
 	{
-		//dir = Move_Scan(); //姿态扫描
+		//dir=Move_Scan(); //姿态扫描
 		dir=which_key();
 		if (dir == MOVE_NONE)
 			OSTmrStart(&display_timer, &err); //重新启动定时器计时
@@ -689,19 +688,19 @@ static Move_DirTypeDef which_key(void)
 {
 	if (Key_Scan(SW1_PORT,SW1)==GPIO_PIN_RESET)
 	{
-		return MOVE_LEFT;
+		return MOVE_UP;
 	}
 	else if (Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)
 	{
-		return MOVE_RIGHT;
+		return MOVE_DOWN;
 	}
 	else if (Key_Scan(SW23_PORT,SW3)==GPIO_PIN_RESET)
 	{
-		return MOVE_UP;
-	}
-	else if (Key_Scan(SW1_PORT,SW1)==GPIO_PIN_RESET && Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)
-	{
-		return MOVE_DOWN;
+		delay_ms(1000);
+		if(Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)
+			return MOVE_LEFT;
+		else
+		return MOVE_RIGHT;
 	}
 	else 
 	return MOVE_NONE;		

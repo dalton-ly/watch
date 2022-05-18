@@ -696,7 +696,7 @@ static Move_DirTypeDef which_key(void)
 	}
 	else if (Key_Scan(SW23_PORT,SW3)==GPIO_PIN_RESET)
 	{
-		delay_ms(1000);
+		delay_ms(100);
 		if(Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)
 			return MOVE_LEFT;
 		else

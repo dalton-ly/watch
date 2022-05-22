@@ -40,6 +40,7 @@
  * @brief Sensor driver for BME280 sensor
  */
 #include "bme280.h"
+#include "i2c.h"
 
 /**\name Internal macros */
 /* To identify osr settings selected by user */
@@ -1584,6 +1585,117 @@ static int8_t null_ptr_check(const struct bme280_dev *dev)
         /* Device structure is fine */
         rslt = BME280_OK;
     }
+
+    return rslt;
+}
+
+
+
+void user_delay_ms(uint32_t period, void *intf_ptr)
+{
+    /*
+     * Return control or wait,
+     * for a period amount of milliseconds
+     */
+}
+
+int8_t user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr)
+{
+    int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
+    i2c_stare();
+    i2c_read();
+
+    /*
+     * The parameter intf_ptr can be used as a variable to store the I2C address of the device
+     */
+
+    /*
+     * Data on the bus should be like
+     * |------------+---------------------|
+     * | I2C action | Data                |
+     * |------------+---------------------|
+     * | Start      | -                   |
+     * | Write      | (reg_addr)          |
+     * | Stop       | -                   |
+     * | Start      | -                   |
+     * | Read       | (reg_data[0])       |
+     * | Read       | (....)              |
+     * | Read       | (reg_data[len - 1]) |
+     * | Stop       | -                   |
+     * |------------+---------------------|
+     */
+
+    return rslt;
+}
+
+int8_t user_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr)
+{
+    int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
+/* 第1步：发起I2C总线启动信号 */
+	i2c_Start();
+	
+	/* 第2步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
+	i2c_SendByte(BME280_I2C_ADDR_PRIM | 0);	/* 此处是写指令 */
+	
+	/* 第3步：发送一个时钟，判断器件是否正确应答 */
+	while(i2c_WaitAck() != 0);
+	
+	while(len--)
+	{	
+		/* 第4步：发送字节地址，24C02只有256字节，因此1个字节就够了，如果是24C04以上，那么此处需要连发多个地址 */
+		i2c_SendByte(reg_addr++);
+		
+		/* 第5步：等待ACK */
+		while(i2c_WaitAck() != 0);
+		
+		/* 第6步：开始写入数据 */
+		i2c_SendByte(*reg_data);
+		
+		reg_data++;
+
+		/* 第7步：发送ACK */
+		while (i2c_WaitAck() != 0);
+	}
+	
+	/* 命令执行成功，发送I2C总线停止信号 */
+	i2c_Stop();
+	return 1;
+
+
+
+/*写时序的具体步骤：
+1、开始信号。
+2、发送 I2C 设备地址，每个 I2C 器件都有一个设备地址，通过发送具体的设备地址来决
+定访问哪个 I2C 器件。这是一个 8 位的数据，其中高 7 位是设备地址，最后 1 位是读写位，为
+1 的话表示这是一个读操作，为 0 的话表示这是一个写操作。
+3、 I2C 器件地址后面跟着一个读写位，为 0 表示写操作，为 1 表示读操作。
+4、从机发送的 ACK 应答信号。
+5、重新发送开始信号。
+6、发送要写写入数据的寄存器地址。
+7、从机发送的 ACK 应答信号。
+8、发送要写入寄存器的数据。
+9、从机发送的 ACK 应答信号。
+10、停止信号。*/
+
+
+
+    /*
+     * The parameter intf_ptr can be used as a variable to store the I2C address of the device
+     */
+
+    /*
+     * Data on the bus should be like
+     * |------------+---------------------|
+     * | I2C action | Data                |
+     * |------------+---------------------|
+     * | Start      | -                   |
+     * | Write      | (reg_addr)          |
+     * | Write      | (reg_data[0])       |
+     * | Write      | (....)              |
+     * | Write      | (reg_data[len - 1]) |
+     * | Stop       | -                   |
+     * |------------+---------------------|
+     */
 
     return rslt;
 }

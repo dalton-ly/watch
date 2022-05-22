@@ -388,6 +388,13 @@ int8_t bme280_compensate_data(uint8_t sensor_comp,
  */
 uint32_t bme280_cal_meas_delay(const struct bme280_settings *settings);
 
+
+//以下位自建函数
+
+int8_t user_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* End of CPP guard */

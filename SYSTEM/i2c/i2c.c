@@ -2,12 +2,12 @@
 
 //模拟I2C BME相关的函数
 /*******************************************************************************
-* 函 数 名         : i2c_stare
+* 函 数 名         : i2c_start
 * 函数功能         : iic开始信号,SCL高电平时，SDA出现一个下跳沿表示启动信号 
 * 输    入         : 无
 * 输    出         : 无
 *******************************************************************************/
-void i2c_stare(void)
+void i2c_Start(void)
 {
     SDA_OUT();  
     I2C_SDA_UP;
@@ -25,13 +25,13 @@ void i2c_stare(void)
 * 输    入         : 无
 * 输    出         : 无
 *******************************************************************************/
-void i2c_stop(void)
+void i2c_Stop(void)
 {
     SDA_OUT();            //sda线输出
     I2C_SDA_LOW;         //发送结束条件的数据信号
-    I2C_SCL_UP;
+    I2C_SCL_UP;         //拉高时钟信号
     delay_us(4);         //结束条件建立时间大于4μ
-    I2C_SDA_UP;         //发送I2C总线结束信号
+    I2C_SDA_UP;         //发送I2C总线结束信号 scl为高时sda有个上升沿
     delay_us(4);
     I2C_SCL_LOW; 
 }
@@ -43,7 +43,7 @@ void i2c_stop(void)
 * 输    入         : uint8_t dat,要发送的数据
 * 输    出         : 无
 *******************************************************************************/
-void i2c_send(uint8_t dat)
+void i2c_SendByte(uint8_t dat)
 {
 
      unsigned char temp;
@@ -66,13 +66,15 @@ void i2c_send(uint8_t dat)
 }
 
 
+
+
 /*******************************************************************************
 * 函 数 名         : i2c_read
 * 函数功能         : iic接收数据
 * 输    入         : 无
 * 输    出         : 无
 *******************************************************************************/
-uint8_t i2c_read(void)
+uint8_t i2c_read(void)//只读取一个字节，换成四个字节
 {
    unsigned char temp;
    unsigned char dat;
@@ -84,11 +86,11 @@ uint8_t i2c_read(void)
       I2C_SCL_UP;
       if(I2C_SDA==1)
       {
-         dat|=temp;
+         dat|=temp;   //位或，dat初始任意，与1位或保留自身 sda读取到1则保留自身
       }
       else
       {
-         dat&=~temp;
+         dat&=~temp; //sda读取到0则与0111 1111 做位与，其他位不变，第一位值零
       }
       I2C_SCL_LOW;
    }
@@ -97,12 +99,12 @@ uint8_t i2c_read(void)
 
 
 /*******************************************************************************
-* 函 数 名         : i2c_wit_ack
+* 函 数 名         : i2c_wait_ack
 * 函数功能         : iic等待应答
 * 输    入         : 无
 * 输    出         : 0/1，返回1表示无应答信号，返回0表示应答
 *******************************************************************************/
-char i2c_wit_ack(void)
+uint8_t i2c_WaitAck(void)
 {
     
     uint8_t con=0;
@@ -194,7 +196,7 @@ void SDA_IN(void)
 {
     /*    HAL库使用, HAL库注意要把初始化函数的静态标记去掉    */
   GPIO_InitTypeDef GPIO_InitStruct;
-  GPIO_InitStruct.Pin = GPIO_PIN_8;                    //使用STM3cubemx是定义好的SDA_Pin为GPIO_PIN_8的标签
+  GPIO_InitStruct.Pin = GPIO_PIN_8;                 
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

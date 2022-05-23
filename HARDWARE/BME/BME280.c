@@ -41,6 +41,7 @@
  */
 #include "bme280.h"
 #include "i2c.h"
+#include "delay.h"
 
 /**\name Internal macros */
 /* To identify osr settings selected by user */
@@ -1585,25 +1586,74 @@ static int8_t null_ptr_check(const struct bme280_dev *dev)
         /* Device structure is fine */
         rslt = BME280_OK;
     }
-
     return rslt;
 }
 
 
 
-void user_delay_ms(uint32_t period, void *intf_ptr)
+void user_delay_us(uint32_t period, void *intf_ptr)
 {
     /*
      * Return control or wait,
      * for a period amount of milliseconds
+     * 
      */
+    delay_us(period);
+
 }
 
 int8_t user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr)
 {
     int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
-    i2c_stare();
-    i2c_read();
+    uint16_t i;
+/* 第1步：发起I2C总线启动信号 */
+	i2c_Start();
+	
+	/* 第2步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
+	i2c_SendByte(BME280_I2C_ADDR_PRIM | 0);	/* 此处是写指令 */
+	
+	/* 第3步：等待ACK */
+	while (i2c_WaitAck() != 0);
+
+	/* 第4步：发送字节地址，24C02只有256字节，因此1个字节就够了，如果是24C04以上，那么此处需要连发多个地址 */
+	i2c_SendByte((uint8_t)reg_addr);
+	
+	/* 第5步：等待ACK */
+	while (i2c_WaitAck() != 0);
+
+	/* 第6步：重新启动I2C总线。前面的代码的目的向EEPROM传送地址，下面开始读取数据 */
+	i2c_Start();
+	
+	/* 第7步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
+	i2c_SendByte(BME280_I2C_ADDR_PRIM | 1);	/* 此处是读指令 */
+	
+	/* 第8步：发送ACK */
+	while (i2c_WaitAck() != 0);
+	
+	/* 第9步：循环读取数据 */
+	for (i = 0; i < len; i++)
+	{
+		reg_data[i] = i2c_ReadByte();	/* 读1个字节 */
+		
+		/* 每读完1个字节后，需要发送Ack， 最后一个字节不需要Ack，发Nack */
+		if (i != len - 1)
+		{
+			i2c_Ack();	/* 中间字节读完后，CPU产生ACK信号(驱动SDA = 0) */
+		}
+		else
+		{
+			i2c_No_Ack();	/* 最后1个字节读完后，CPU产生NACK信号(驱动SDA = 1) */
+		}
+	}
+	/* 发送I2C总线停止信号 */
+	i2c_Stop();
+    rslt=1;	/* 执行成功 */
+/*
+cmd_fail: // 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 
+	i2c_Stop();
+	return 0;
+*/
+
 
     /*
      * The parameter intf_ptr can be used as a variable to store the I2C address of the device
@@ -1650,18 +1700,14 @@ int8_t user_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *i
 		
 		/* 第6步：开始写入数据 */
 		i2c_SendByte(*reg_data);
-		
 		reg_data++;
-
 		/* 第7步：发送ACK */
 		while (i2c_WaitAck() != 0);
 	}
-	
 	/* 命令执行成功，发送I2C总线停止信号 */
 	i2c_Stop();
-	return 1;
-
-
+    rslt=1;
+	return rslt;
 
 /*写时序的具体步骤：
 1、开始信号。
@@ -1696,6 +1742,4 @@ int8_t user_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *i
      * | Stop       | -                   |
      * |------------+---------------------|
      */
-
-    return rslt;
 }

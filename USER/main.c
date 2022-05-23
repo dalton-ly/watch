@@ -15,6 +15,7 @@ static void move_task_compass(Move_DirTypeDef dir);
 static Move_DirTypeDef which_key(void);
 static Move_DirTypeDef Move_Scan(void);
 
+
 static Display_TypeDef Disp = Disp_Menu; //当前界面
 static int8_t id = -1;					 //菜单id，默认为时间界面
 
@@ -90,6 +91,22 @@ void SW_Init(void)//按键引脚初始化
 	HAL_GPIO_Init(SW23_PORT, &GPIO_InitStructure_SW2);
 }
 
+//bme初始化函数
+
+void BME280_Init()
+{
+	struct bme280_dev dev;
+	int8_t rslt = BME280_OK;
+	uint8_t dev_addr = BME280_I2C_ADDR_PRIM;
+
+	dev.intf_ptr = &dev_addr;
+	dev.intf = BME280_I2C_INTF;
+	dev.read = user_i2c_read;
+	dev.write = user_i2c_write;
+	dev.delay_us = user_delay_us;
+	rslt = bme280_init(&dev);
+}
+
 
 
 int main(void)
@@ -107,6 +124,7 @@ int main(void)
 	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
 	Kalman_Init();					 //卡尔曼参数初始化
 	MPU9250_Init();					 //MPU9250初始化
+	BME280_Init();
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
 	lv_init();			 //lvgl 系统初始化

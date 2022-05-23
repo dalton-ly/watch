@@ -74,7 +74,7 @@ void i2c_SendByte(uint8_t dat)
 * 输    入         : 无
 * 输    出         : 无
 *******************************************************************************/
-uint8_t i2c_read(void)//只读取一个字节，换成四个字节
+uint8_t i2c_ReadByte(void)
 {
    unsigned char temp;
    unsigned char dat;
@@ -136,7 +136,7 @@ uint8_t i2c_WaitAck(void)
 * 输    入         : 无
 * 输    出         : 无
 *******************************************************************************/
-void i2c_ack(void)
+void i2c_Ack(void)
 {
     SDA_OUT();
     I2C_SDA_LOW;
@@ -155,7 +155,7 @@ void i2c_ack(void)
 * 输    入         : 无
 * 输    出         : 无
 *******************************************************************************/
-void I2C_No_ack(void)
+void i2c_No_Ack(void)
 {
    SDA_OUT();
    I2C_SDA_UP;
@@ -210,7 +210,7 @@ void SDA_IN(void)
 * 输    入         : i
 * 输    出         : 无
 *******************************************************************************/
-void delay_us(uint32_t i)
+/* void delay_us(uint32_t i)
 {
     uint32_t temp;
     SysTick->LOAD=9*i;                     //设置重装数值, 72MHZ时
@@ -225,7 +225,7 @@ void delay_us(uint32_t i)
         
     SysTick->CTRL=0;         //关闭计数器
     SysTick->VAL=0;        //清空计数器
-}
+} */
 
 
 

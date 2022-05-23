@@ -31,12 +31,12 @@
 #define I2C_SDA        HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_8)        //获取SDA引脚状态
 #define I2C_SCL        HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_9)        //获取SCL引脚状态 
 void i2c_Start(void);              //开始信号    
-void i2c_ack(void);                //应答信号    
-void I2C_No_ack(void);             //非应答信号    
+void i2c_Ack(void);                //应答信号    
+void i2c_No_Ack(void);             //非应答信号    
 void i2c_Stop(void);               //停止信号    
 uint8_t i2c_WaitAck(void);            //等待应答
 void i2c_SendByte(uint8_t dat);        //发送数据
-uint8_t i2c_read(void);            //接收数据
+uint8_t i2c_ReadByte(void);            //接收数据
  
 void SDA_OUT(void);                //SDA 设置为输出    
 void SDA_IN(void);                //SDA 设置为输入    

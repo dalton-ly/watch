@@ -24,7 +24,7 @@
 #include "lvgl.h"
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
-
+#include "BME280.h"
 typedef enum
 {
 	Disp_Menu = -1,

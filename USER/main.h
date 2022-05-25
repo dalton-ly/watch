@@ -20,6 +20,7 @@
 #include "app_about.h"
 #include "app_setting.h"
 #include "app_compass.h"
+#include "app_humidity.h"
 
 #include "lvgl.h"
 #include "lv_port_disp.h"
@@ -30,7 +31,8 @@ typedef enum
 	Disp_Menu = -1,
 	Disp_Compass,
 	Disp_Setting,
-	Disp_About
+	Disp_About,
+	Disp_Humidity
 } Display_TypeDef; //当前界面枚举
 
 typedef enum

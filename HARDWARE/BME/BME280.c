@@ -1745,6 +1745,7 @@ int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, v
 
 
 int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev, struct bme280_data* comp_data)//普通模式下读取数据
+//传入的结构变量来保存数据用于输出
 {
 	int8_t rslt;
 	uint8_t settings_sel;
@@ -1768,8 +1769,8 @@ int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev, struct bme280_data
 	//printf("Temperature, Pressure, Humidity\r\n");
 	while (1) {
 		/* Delay while the sensor completes a measurement */
-		dev->delay_us(70, dev->intf_ptr);
-		rslt = bme280_get_sensor_data(BME280_ALL, &comp_data, dev);
+		dev->delay_us(70000, dev->intf_ptr);
+		rslt = bme280_get_sensor_data(BME280_ALL, comp_data, dev);//原本传入指针去除掉&
 		//print_sensor_data(&comp_data);
 	}
 	return rslt;

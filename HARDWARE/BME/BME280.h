@@ -394,7 +394,7 @@ uint32_t bme280_cal_meas_delay(const struct bme280_settings *settings);
 int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
 int8_t user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
 void user_delay_us(uint32_t period, void *intf_ptr);
-
+int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev, struct bme280_data* comp_data);//读取数据
 
 #ifdef __cplusplus
 }

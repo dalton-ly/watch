@@ -7,7 +7,8 @@ typedef enum
 {
 	ICON_ID_COMPASS = 0,
 	ICON_ID_SETTING,
-	ICON_ID_ABOUT
+	ICON_ID_ABOUT,
+	ICON_ID_HUMIDITY
 }ICON_IDTypeDef;
 
 typedef struct

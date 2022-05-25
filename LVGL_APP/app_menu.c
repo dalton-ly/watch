@@ -5,12 +5,14 @@
 LV_IMG_DECLARE(setting);
 LV_IMG_DECLARE(compass);
 LV_IMG_DECLARE(about);
+LV_IMG_DECLARE(humidity_pic);
 
-static ICON_TypeDef menu[3] =
+static ICON_TypeDef menu[4] =//一个icono结构体数组
 {
 	{.img_buffer = &compass},
 	{.img_buffer = &setting},
 	{.img_buffer = &about},
+	{.img_buffer=&humidity_pic},
 };
 
 //创建菜单界面

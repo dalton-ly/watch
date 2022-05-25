@@ -16,7 +16,7 @@ static Move_DirTypeDef which_key(void);
 static Move_DirTypeDef Move_Scan(void);
 
 
-static Display_TypeDef Disp = Disp_Menu; //当前界面
+static Display_TypeDef Disp = Disp_Menu; //当前界面 菜单一个界面，包含几个图片的选择。
 static int8_t id = -1;					 //菜单id，默认为时间界面
 
 static AngleGyro_TypeDef *ag_t;
@@ -123,7 +123,7 @@ int main(void)
 	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
 	Kalman_Init();					 //卡尔曼参数初始化
 	MPU9250_Init();					 //MPU9250初始化
-	//BME280_Init();					 //BME280的初始化
+	BME280_Init();					 //BME280的初始化
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
 	lv_init();			 //lvgl 系统初始化
@@ -450,7 +450,7 @@ void move_task(void *p_arg)
 		switch (Disp)
 		{
 		case Disp_Menu:
-			move_task_menu(dir);
+			move_task_menu(dir);//
 			break;
 		case Disp_About:
 			move_task_about(dir);
@@ -460,6 +460,9 @@ void move_task(void *p_arg)
 			break;
 		case Disp_Setting:
 			move_task_setting(dir);
+			break;
+		case Disp_Humidity:
+			move_task_humidity(dir);
 			break;
 		default:
 			break;
@@ -541,9 +544,12 @@ static void move_task_menu_change_display(Display_TypeDef disp_t)
 	case Disp_About:
 		app_about_anim_Vexit(false); //将about界面显示
 		break;
+	case Disp_Humidity:
+		app_humidity_anim_Vexit(false);//显示温湿度气压信息
+		break;
 	default:
 		break;
-	}
+	} 
 
 	app_menu_anim_Hexit(id, true); //移出菜单界面
 }
@@ -554,7 +560,7 @@ static void move_task_menu(Move_DirTypeDef dir)
 	switch (dir)
 	{
 	case MOVE_UP:	 //手臂往上移动
-		if (id == 0) //当前界面是菜单第一个，向上之后是主界面
+		if (id == 0) //当前界面是菜单第一个，向上之后是主界面 move_up为sw1
 		{
 			app_time_anim_Hexit(true);				//主界面进入
 			app_menu_anim_Vexit((uint8_t)id, true); //菜单第一个向上(退出中心)
@@ -567,7 +573,7 @@ static void move_task_menu(Move_DirTypeDef dir)
 		if (id == -1 && ag_t->imu_d.az > -4000)
 			Power_Off();
 
-		id = id <= 0 ? -1 : id - 1;
+		id = id <= 0 ? -1 : id - 1; //移动后id减一
 		break;
 	case MOVE_DOWN:	  //手臂往下移动
 		if (id == -1) //当前界面是主菜单，下一个是菜单第一个
@@ -580,7 +586,7 @@ static void move_task_menu(Move_DirTypeDef dir)
 			app_menu_anim_Vexit((uint8_t)id, false);
 			app_menu_anim_Vexit((uint8_t)(id + 1), false);
 		}
-		id = id >= 2 ? 2 : id + 1;
+		id = id >= 3 ? 3 : id + 1;
 		break;
 	case MOVE_RIGHT:
 		if (id != -1)
@@ -705,15 +711,15 @@ static Move_DirTypeDef Move_Scan(void)
 //按键读取按键 返回哪个按键被按下
 static Move_DirTypeDef which_key(void)
 {
-	if (Key_Scan(SW1_PORT,SW1)==GPIO_PIN_RESET)
+	if (Key_Scan(SW1_PORT,SW1)==GPIO_PIN_RESET)//SW1向上移动
 	{
 		return MOVE_UP;
 	}
-	else if (Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)
+	else if (Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)//SW2向下
 	{
 		return MOVE_DOWN;
 	}
-	else if (Key_Scan(SW23_PORT,SW3)==GPIO_PIN_RESET)
+	else if (Key_Scan(SW23_PORT,SW3)==GPIO_PIN_RESET)//sw3向右，23同时按下向左（退出）
 	{
 		delay_ms(100);
 		if(Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)

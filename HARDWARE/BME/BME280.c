@@ -1677,7 +1677,7 @@ cmd_fail: // 命令执行失败后，切记发送停止信号，避免影响I2C�
     return rslt;
 }
 
-int8_t user_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr)
+int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr)
 {
     int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
 /* 第1步：发起I2C总线启动信号 */
@@ -1741,4 +1741,36 @@ int8_t user_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *i
      * | Stop       | -                   |
      * |------------+---------------------|
      */
+}
+
+
+int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev, struct bme280_data* comp_data)//普通模式下读取数据
+{
+	int8_t rslt;
+	uint8_t settings_sel;
+	//struct bme280_data comp_data;
+
+	/* Recommended mode of operation: Indoor navigation */
+	dev->settings.osr_h = BME280_OVERSAMPLING_1X;
+	dev->settings.osr_p = BME280_OVERSAMPLING_16X;
+	dev->settings.osr_t = BME280_OVERSAMPLING_2X;
+	dev->settings.filter = BME280_FILTER_COEFF_16;
+	dev->settings.standby_time = BME280_STANDBY_TIME_62_5_MS;
+
+	settings_sel = BME280_OSR_PRESS_SEL;
+	settings_sel |= BME280_OSR_TEMP_SEL;
+	settings_sel |= BME280_OSR_HUM_SEL;
+	settings_sel |= BME280_STANDBY_SEL;
+	settings_sel |= BME280_FILTER_SEL;
+	rslt = bme280_set_sensor_settings(settings_sel, dev);
+	rslt = bme280_set_sensor_mode(BME280_NORMAL_MODE, dev);
+
+	//printf("Temperature, Pressure, Humidity\r\n");
+	while (1) {
+		/* Delay while the sensor completes a measurement */
+		dev->delay_us(70, dev->intf_ptr);
+		rslt = bme280_get_sensor_data(BME280_ALL, &comp_data, dev);
+		//print_sensor_data(&comp_data);
+	}
+	return rslt;
 }

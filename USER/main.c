@@ -93,19 +93,18 @@ void SW_Init(void)//按键引脚初始化
 
 //bme初始化函数
 
-void BME280_Init()
+ void BME280_Init()
 {
 	struct bme280_dev dev;
 	int8_t rslt = BME280_OK;
 	uint8_t dev_addr = BME280_I2C_ADDR_PRIM;
-
 	dev.intf_ptr = &dev_addr;
 	dev.intf = BME280_I2C_INTF;
 	dev.read = user_i2c_read;
 	dev.write = user_i2c_write;
 	dev.delay_us = user_delay_us;
 	rslt = bme280_init(&dev);
-}
+} 
 
 
 
@@ -124,7 +123,7 @@ int main(void)
 	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
 	Kalman_Init();					 //卡尔曼参数初始化
 	MPU9250_Init();					 //MPU9250初始化
-	BME280_Init();
+	//BME280_Init();					 //BME280的初始化
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
 	lv_init();			 //lvgl 系统初始化
@@ -349,6 +348,8 @@ void lvgl_task(void *p_arg)
 	app_about_create();			//创建"关于"界面
 	app_setting_create();		//创建"设置"界面
 	app_compass_create();		//创建"指南针"界面
+	app_humidity_create();		//创建气压温度界面
+	
 
 	ag_t = Get_Angle_GyroxStructure();
 	
@@ -701,7 +702,7 @@ static Move_DirTypeDef Move_Scan(void)
 	else
 		return MOVE_NONE;
 }
-//新建一个按键读取按键 返回哪个按键被按下
+//按键读取按键 返回哪个按键被按下
 static Move_DirTypeDef which_key(void)
 {
 	if (Key_Scan(SW1_PORT,SW1)==GPIO_PIN_RESET)

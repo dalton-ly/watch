@@ -7,14 +7,14 @@ static lv_obj_t *cont; //页面容器
 
 static lv_obj_t *label_title;  //显示标题
 static lv_obj_t *label_mcu;	   //显示mcu信息
-static lv_obj_t *label_gui;	   //显示gui信息
+static lv_obj_t *label_Date;	   //显示Date信息
 static lv_obj_t *label_author; //显示作者信息
 static lv_obj_t *logo_img;	   //logo
 
 static const char *title_text = "About";
 static const char *mcu_text = "MCU: STM32F411CEU6";
-static const char *gui_text = "GUI: littleVGL V7";
-static const char *author_text = "AUTHOR: Jumping";
+static const char *Date_text = "Date: 2022.5";
+static const char *author_text = "AUTHOR: LiYang";
 
 //创建关于界面
 void app_about_create(void)
@@ -42,15 +42,15 @@ void app_about_create(void)
 	lv_label_set_static_text(label_mcu, mcu_text);
 	lv_obj_align(label_mcu, label_title, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
 
-	label_gui = lv_label_create(cont, NULL);														   //创建GUI标签
-	lv_obj_set_style_local_text_color(label_gui, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_YELLOW); //设置字体颜色
-	lv_label_set_static_text(label_gui, gui_text);
-	lv_obj_align(label_gui, label_mcu, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
+	label_Date = lv_label_create(cont, NULL);														   //创建Date标签
+	lv_obj_set_style_local_text_color(label_Date, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_YELLOW); //设置字体颜色
+	lv_label_set_static_text(label_Date, Date_text);
+	lv_obj_align(label_Date, label_mcu, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
 
 	label_author = lv_label_create(cont, NULL);															  //创建AUTHOR标签
 	lv_obj_set_style_local_text_color(label_author, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_YELLOW); //设置字体颜色
 	lv_label_set_static_text(label_author, author_text);
-	lv_obj_align(label_author, label_gui, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
+	lv_obj_align(label_author, label_Date, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
 
 	logo_img = lv_img_create(cont, NULL); //创建logo
 	lv_img_set_src(logo_img, &start);	  //logo显示图片

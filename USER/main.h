@@ -25,6 +25,7 @@
 #include "lvgl.h"
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
+
 #include "BME280.h"
 typedef enum
 {
@@ -131,6 +132,20 @@ OS_TCB TimeTaskTCB;
 //任务堆栈
 CPU_STK TIME_TASK_STK[TIME_STK_SIZE];
 void time_task(void *p_arg);
+
+
+//定义湿度更新任务优先级
+#define HUMIDITY_TASK_PRIO 13
+//堆栈大小
+#define HUMIDITY_STK_SIZE 512
+//控制块
+OS_TCB HumidityTaskTCB;
+//堆栈
+CPU_STK HUMIDITY_TASK_STK[HUMIDITY_STK_SIZE];
+void humidity_task(void* p_arg);
+
+
+
 
 //任务优先级
 #define LED0_TASK_PRIO 15

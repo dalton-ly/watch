@@ -120,7 +120,7 @@ uint8_t i2c_WaitAck(void)
         con++;
         if(con>255)
         {
-            i2c_stop();
+            i2c_Stop();
       		return 1;     //无应答信号
         }
   }

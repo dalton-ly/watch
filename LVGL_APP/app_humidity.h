@@ -6,6 +6,6 @@
 
 
 void app_humidity_create(void);
-void app_humitity_anim_Vexit(bool dir);
+void app_humidity_anim_Vexit(bool dir);
 
 #endif

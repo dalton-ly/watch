@@ -12,6 +12,7 @@ static void move_task_menu_change_display(Display_TypeDef disp_t);
 static void move_task_about(Move_DirTypeDef dir);
 static void move_task_setting(Move_DirTypeDef dir);
 static void move_task_compass(Move_DirTypeDef dir);
+static void move_task_humidity(Move_DirTypeDef dir);
 static Move_DirTypeDef which_key(void);
 static Move_DirTypeDef Move_Scan(void);
 
@@ -19,6 +20,8 @@ static Move_DirTypeDef Move_Scan(void);
 static Display_TypeDef Disp = Disp_Menu; //当前界面 菜单一个界面，包含几个图片的选择。
 static int8_t id = -1;					 //菜单id，默认为时间界面
 
+struct bme280_data bmedata;	//保存从bme280读取的数据
+struct bme280_dev dev;
 static AngleGyro_TypeDef *ag_t;
 
 //定义按键
@@ -95,7 +98,6 @@ void SW_Init(void)//按键引脚初始化
 
  void BME280_Init()
 {
-	struct bme280_dev dev;
 	int8_t rslt = BME280_OK;
 	uint8_t dev_addr = BME280_I2C_ADDR_PRIM;
 	dev.intf_ptr = &dev_addr;
@@ -301,6 +303,21 @@ void APP_TaskCreate(void)
 				 (void *)0,
 				 (OS_OPT)OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR | OS_OPT_TASK_SAVE_FP,
 				 (OS_ERR *)&err);
+	//创建bme280任务
+	OSTaskCreate((OS_TCB *)&HumidityTaskTCB,
+				 (CPU_CHAR *)"humidity task",
+				 (OS_TASK_PTR)humidity_task,
+				 (void *)0,
+				 (OS_PRIO)HUMIDITY_TASK_PRIO,		//13
+				 (CPU_STK *)&HUMIDITY_TASK_STK[0],
+				 (CPU_STK_SIZE)HUMIDITY_STK_SIZE / 10,
+				 (CPU_STK_SIZE)HUMIDITY_STK_SIZE,
+				 (OS_MSG_QTY)0,
+				 (OS_TICK)0,
+				 (void *)0,
+				 (OS_OPT)OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR | OS_OPT_TASK_SAVE_FP,
+				 (OS_ERR *)&err);
+
 	//创建息屏控制软件定时器
 	OSTmrCreate(&display_timer, "display timer", 900, 0, OS_OPT_TMR_ONE_SHOT, display_tim_callback, NULL, &err);
 	OS_TaskSuspend((OS_TCB *)&CompassTaskTCB, &err); //挂起COMPASS任务 发生调度 
@@ -511,6 +528,23 @@ void time_task(void *p_arg)
 	}
 }
 
+//更新bme280数据
+void humidity_task(void* p_arg)
+{
+	OS_ERR err;
+	p_arg = p_arg;
+	CPU_SR_ALLOC();	//需要用到临界区
+
+	while(1)
+	{
+	OS_CRITICAL_ENTER();
+	stream_sensor_data_normal_mode(&dev,&bmedata);	
+	OS_CRITICAL_EXIT(); //退出临界区
+	OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &err); //延时200ms
+	}
+}
+
+
 //led0任务函数，优先级15
 void led0_task(void *p_arg)
 {
@@ -687,6 +721,20 @@ static void move_task_compass(Move_DirTypeDef dir)
 			break;
 		default:
 			break;
+	}
+}
+
+static void move_task_humidity(Move_DirTypeDef dir)
+{
+	switch (dir)
+	{
+	case MOVE_LEFT:
+		Disp = Disp_Menu;
+		app_humidity_anim_Vexit(true);		//将about界面退出
+		app_menu_anim_Hexit(id, false); //移入菜单界面
+		break;
+	default:
+		break;
 	}
 }
 

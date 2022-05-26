@@ -6,6 +6,14 @@
         "app_menu.h": "c",
         "sys.h": "c",
         "includes.h": "c",
-        "app_anim.h": "c"
+        "app_anim.h": "c",
+        "mpu9250.h": "c",
+        "stddef.h": "c",
+        "delay.h": "c",
+        "bme280.h": "c",
+        "string.h": "c",
+        "app_about.h": "c",
+        "app_humidity.h": "c",
+        "bme280_defs.h": "c"
     }
 }

@@ -339,7 +339,7 @@
               <MiscControls>--diag_suppress=68 --diag_suppress=111 --diag_suppress=550</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F411xE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\OBJ;..\USER;..\HALLIB\STM32F4xx_HAL_Driver\Inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE\LED;..\UCOSIII\uC-CPU;..\UCOSIII\uC-LIB;..\UCOSIII\UCOS-BSP;..\UCOSIII\UCOS-CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\SYSTEM\spi;..\HARDWARE\LCD;..\SYSTEM\dma;..\SYSTEM\timer;..\LVGL;..\LVGL\lvgl;..\LVGL\lv_examples;..\LVGL\lvgl_driver;..\LVGL_APP;..\LVGL\lvgl\src\lv_hal;..\HARDWARE\BAT_ADC;..\LVGL_APP\picture;..\SYSTEM\i2c;..\HARDWARE\RTC;..\HARDWARE\IMU;..\HARDWARE\IMU\Kalman;..\SYSTEM\watch dog</IncludePath>
+              <IncludePath>..\CORE;..\OBJ;..\USER;..\HALLIB\STM32F4xx_HAL_Driver\Inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE\LED;..\UCOSIII\uC-CPU;..\UCOSIII\uC-LIB;..\UCOSIII\UCOS-BSP;..\UCOSIII\UCOS-CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\SYSTEM\spi;..\HARDWARE\LCD;..\SYSTEM\dma;..\SYSTEM\timer;..\LVGL;..\LVGL\lvgl;..\LVGL\lv_examples;..\LVGL\lvgl_driver;..\LVGL_APP;..\LVGL\lvgl\src\lv_hal;..\HARDWARE\BAT_ADC;..\LVGL_APP\picture;..\SYSTEM\i2c;..\HARDWARE\RTC;..\HARDWARE\IMU;..\HARDWARE\IMU\Kalman;..\SYSTEM\watch dog;..\HARDWARE\BME</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -397,6 +397,11 @@
               <FileName>system_stm32f4xx.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\system_stm32f4xx.c</FilePath>
+            </File>
+            <File>
+              <FileName>humidity_pic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LVGL_APP\picture\humidity_pic.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -612,6 +617,11 @@
               <FileName>bat_adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\BAT_ADC\bat_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>BME280.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\BME\BME280.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1418,6 +1428,11 @@
               <FileType>1</FileType>
               <FilePath>..\LVGL_APP\app_anim.c</FilePath>
             </File>
+            <File>
+              <FileName>app_humidity.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LVGL_APP\app_humidity.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1532,6 +1547,11 @@
               <FileName>compass_needle.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LVGL_APP\picture\compass_needle.c</FilePath>
+            </File>
+            <File>
+              <FileName>humidity_pic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LVGL_APP\picture\humidity_pic.c</FilePath>
             </File>
           </Files>
         </Group>

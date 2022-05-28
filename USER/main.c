@@ -110,6 +110,8 @@ void SW_Init(void)//按键引脚初始化
 
 
 
+
+
 int main(void)
 {
 	OS_ERR err;
@@ -120,12 +122,13 @@ int main(void)
 	Power_Init();					 //初始化电源控制
 	LED_Init();						 //初始化LED 或许可以去除？
 	LCD_Init();						 //初始化LCD
-	SW_Init();	
+	SW_Init();						//按键初始化
+	i2c_init();
 	Bat_ADC_Init();					 //初始化ADC
 	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
 	Kalman_Init();					 //卡尔曼参数初始化
 	MPU9250_Init();					 //MPU9250初始化
-	BME280_Init();					 //BME280的初始化
+	//BME280_Init();					 //BME280的初始化
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
 	lv_init();			 //lvgl 系统初始化
@@ -528,7 +531,7 @@ void time_task(void *p_arg)
 	}
 }
 
-//更新bme280数据
+//更新bme280数据 优先级13
 void humidity_task(void* p_arg)
 {
 	OS_ERR err;

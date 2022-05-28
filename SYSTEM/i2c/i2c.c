@@ -66,6 +66,23 @@ void i2c_SendByte(uint8_t dat)
 }
 
 
+void i2c_init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    GPIO_InitStruct.Mode=GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull=GPIO_NOPULL;
+    GPIO_InitStruct.Pin=GPIO_PIN_8|GPIO_PIN_9;
+    GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_HIGH;
+    
+    HAL_GPIO_Init(GPIOA,&GPIO_InitStruct);
+    
+    
+    I2C_SCL_UP;
+    I2C_SDA_UP;
+}
+
 
 
 /*******************************************************************************
@@ -118,7 +135,7 @@ uint8_t i2c_WaitAck(void)
   while(I2C_SDA)    //CPU读取SDA口线状态
   {
         con++;
-        if(con>255)
+		if(con>254)//八位无符号整数最大为255，不能设置为大于255
         {
             i2c_Stop();
       		return 1;     //无应答信号
@@ -181,7 +198,7 @@ void SDA_OUT(void)
   GPIO_InitStruct.Pin = GPIO_PIN_8;                
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
 
@@ -199,7 +216,7 @@ void SDA_IN(void)
   GPIO_InitStruct.Pin = GPIO_PIN_8;                 
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 } 
 

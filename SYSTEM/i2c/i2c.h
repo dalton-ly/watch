@@ -41,7 +41,7 @@ uint8_t i2c_ReadByte(void);            //接收数据
 void SDA_OUT(void);                //SDA 设置为输出    
 void SDA_IN(void);                //SDA 设置为输入    
 void delay_us(uint32_t i);        //延时    
-
+void i2c_init(void);
 
 
 

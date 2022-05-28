@@ -27,6 +27,8 @@
 #include "lv_port_indev.h"
 
 #include "BME280.h"
+
+#include "i2c.h"
 typedef enum
 {
 	Disp_Menu = -1,

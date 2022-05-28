@@ -398,11 +398,6 @@
               <FileType>1</FileType>
               <FilePath>.\system_stm32f4xx.c</FilePath>
             </File>
-            <File>
-              <FileName>humidity_pic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LVGL_APP\picture\humidity_pic.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

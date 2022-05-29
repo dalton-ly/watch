@@ -71,16 +71,14 @@ void i2c_init(void)
 	GPIO_InitTypeDef GPIO_InitStruct={0};
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
-    GPIO_InitStruct.Mode=GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Mode=GPIO_MODE_OUTPUT_OD;
     GPIO_InitStruct.Pull=GPIO_NOPULL;
     GPIO_InitStruct.Pin=GPIO_PIN_8|GPIO_PIN_9;
     GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_HIGH;
     
     HAL_GPIO_Init(GPIOA,&GPIO_InitStruct);
     
-    
-    I2C_SCL_UP;
-    I2C_SDA_UP;
+	i2c_Stop();
 }
 
 
@@ -196,7 +194,7 @@ void SDA_OUT(void)
     /*    HAL库使用，HAL库注意要把初始化函数的静态标记去掉    */
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_InitStruct.Pin = GPIO_PIN_8;                
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);

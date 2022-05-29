@@ -22,10 +22,10 @@
 #define I2C_BME_SDA GPIO_PIN_8
 #define I2C_BME_SCL GPIO_PIN_9
 
-#define I2C_SDA_UP        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_8,GPIO_PIN_SET)                //SDA高电平
-#define I2C_SDA_LOW        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_8,GPIO_PIN_RESET)            //SDA低电平
-#define I2C_SCL_UP        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_9,GPIO_PIN_SET)              //SCL高电平
-#define I2C_SCL_LOW        HAL_GPIO_WritePin(GPIOC,GPIO_PIN_9,GPIO_PIN_RESET)            //SCL低电平
+#define I2C_SDA_UP        HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_SET)                //SDA高电平
+#define I2C_SDA_LOW        HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_RESET)            //SDA低电平
+#define I2C_SCL_UP        HAL_GPIO_WritePin(GPIOA,GPIO_PIN_9,GPIO_PIN_SET)              //SCL高电平
+#define I2C_SCL_LOW        HAL_GPIO_WritePin(GPIOA,GPIO_PIN_9,GPIO_PIN_RESET)            //SCL低电平
 
 
 #define I2C_SDA        HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_8)        //获取SDA引脚状态

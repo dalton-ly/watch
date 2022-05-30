@@ -93,7 +93,7 @@ void SW_Init(void)//按键引脚初始化
 
 //bme初始化函数
 
-void BME280_Init()
+/*void BME280_Init()
 {
 	struct bme280_dev dev;
 	int8_t rslt = BME280_OK;
@@ -106,7 +106,7 @@ void BME280_Init()
 	dev.delay_us = user_delay_us;
 	rslt = bme280_init(&dev);
 }
-
+*/
 
 
 int main(void)
@@ -124,7 +124,7 @@ int main(void)
 	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
 	Kalman_Init();					 //卡尔曼参数初始化
 	MPU9250_Init();					 //MPU9250初始化
-	BME280_Init();
+	//BME280_Init();
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
 	lv_init();			 //lvgl 系统初始化

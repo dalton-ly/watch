@@ -5,12 +5,14 @@
 LV_IMG_DECLARE(setting);
 LV_IMG_DECLARE(compass);
 LV_IMG_DECLARE(about);
+LV_IMG_DECLARE(heartrate);
 
-static ICON_TypeDef menu[3] =
+static ICON_TypeDef menu[4] =
 {
 	{.img_buffer = &compass},
 	{.img_buffer = &setting},
 	{.img_buffer = &about},
+	{.img_buffer = &heartrate},
 };
 
 //创建菜单界面

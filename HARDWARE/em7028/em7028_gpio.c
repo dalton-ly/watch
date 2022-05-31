@@ -77,7 +77,7 @@ void HRS_I2C_INIT(void)
 
 static void HRS_i2c_udelay(unsigned int time)
 {
-	nrf_delay_us(time);
+	delay_us(time);
 }
 
 /*

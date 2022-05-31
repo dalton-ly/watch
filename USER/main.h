@@ -20,17 +20,21 @@
 #include "app_about.h"
 #include "app_setting.h"
 #include "app_compass.h"
-
+#include "app_heartrate.h"
 #include "lvgl.h"
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
 //#include "BME280.h"
+extern unsigned int heart_data;//心率数据
+
+
 typedef enum
 {
 	Disp_Menu = -1,
 	Disp_Compass,
 	Disp_Setting,
-	Disp_About
+	Disp_About,
+	Disp_Heartrate
 } Display_TypeDef; //当前界面枚举
 
 typedef enum

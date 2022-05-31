@@ -12,6 +12,7 @@ static void move_task_menu_change_display(Display_TypeDef disp_t);
 static void move_task_about(Move_DirTypeDef dir);
 static void move_task_setting(Move_DirTypeDef dir);
 static void move_task_compass(Move_DirTypeDef dir);
+static void move_task_heartrate(Move_DirTypeDef dir);
 static Move_DirTypeDef which_key(void);
 //static Move_DirTypeDef Move_Scan(void);
 
@@ -350,7 +351,7 @@ void lvgl_task(void *p_arg)
 	app_about_create();			//创建"关于"界面
 	app_setting_create();		//创建"设置"界面
 	app_compass_create();		//创建"指南针"界面
-
+	app_heartrate_create();//创建心率界面
 	ag_t = Get_Angle_GyroxStructure();
 	
 	APP_TaskCreate(); //创建一些任务
@@ -461,6 +462,9 @@ void move_task(void *p_arg)
 		case Disp_Setting:
 			move_task_setting(dir);
 			break;
+		case Disp_Heartrate:
+			move_task_heartrate(dir);
+			break;
 		default:
 			break;
 		}
@@ -541,6 +545,9 @@ static void move_task_menu_change_display(Display_TypeDef disp_t)
 	case Disp_About:
 		app_about_anim_Vexit(false); //将about界面显示
 		break;
+	case Disp_Heartrate:
+		app_heartrate_anim_Vexit(false);
+		break;
 	default:
 		break;
 	}
@@ -575,12 +582,12 @@ static void move_task_menu(Move_DirTypeDef dir)
 			app_time_anim_Hexit(false);					   //主菜单退出
 			app_menu_anim_Vexit((uint8_t)(id + 1), false); //下一个向上(进入中心)
 		}
-		else if (id <= 1)
+		else if (id <= 2)
 		{
 			app_menu_anim_Vexit((uint8_t)id, false);
 			app_menu_anim_Vexit((uint8_t)(id + 1), false);
 		}
-		id = id >= 2 ? 2 : id + 1;
+		id = id >= 3 ? 3 : id + 1;
 		break;
 	case MOVE_RIGHT:
 		if (id != -1)
@@ -681,6 +688,20 @@ static void move_task_compass(Move_DirTypeDef dir)
 			break;
 		default:
 			break;
+	}
+}
+
+static void move_task_heartrate(Move_DirTypeDef dir)
+{
+	switch (dir)
+	{
+	case MOVE_LEFT:
+		Disp = Disp_Menu;
+		app_heartrate_anim_Vexit(true);		//将about界面退出
+		app_menu_anim_Hexit(id, false); //移入菜单界面
+		break;
+	default:
+		break;
 	}
 }
 

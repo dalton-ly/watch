@@ -13,7 +13,7 @@ static void move_task_about(Move_DirTypeDef dir);
 static void move_task_setting(Move_DirTypeDef dir);
 static void move_task_compass(Move_DirTypeDef dir);
 static Move_DirTypeDef which_key(void);
-static Move_DirTypeDef Move_Scan(void);
+//static Move_DirTypeDef Move_Scan(void);
 
 
 static Display_TypeDef Disp = Disp_Menu; //当前界面
@@ -117,7 +117,7 @@ int main(void)
 	HAL_Init();						 //初始化HAL库
 	delay_init(100);				 //初始化延时函数
 	Power_Init();					 //初始化电源控制
-	LED_Init();						 //初始化LED 或许可以去除？
+	//LED_Init();						 //初始化LED 或许可以去除？
 	LCD_Init();						 //初始化LCD
 	SW_Init();	
 	Bat_ADC_Init();					 //初始化ADC
@@ -246,6 +246,7 @@ void APP_TaskCreate(void)
 				 (void *)0,
 				 (OS_OPT)OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR | OS_OPT_TASK_SAVE_FP,
 				 (OS_ERR *)&err);
+				 
 	//创建BAT任务
 	OSTaskCreate((OS_TCB *)&BatTaskTCB,
 				 (CPU_CHAR *)"bat task",
@@ -684,7 +685,7 @@ static void move_task_compass(Move_DirTypeDef dir)
 }
 
 //动作扫描函数
-static Move_DirTypeDef Move_Scan(void)
+/*static Move_DirTypeDef Move_Scan(void)
 {
 	AngleGyro_TypeDef *ag_t;
 
@@ -701,6 +702,7 @@ static Move_DirTypeDef Move_Scan(void)
 	else
 		return MOVE_NONE;
 }
+*/
 //新建一个按键读取按键 返回哪个按键被按下
 static Move_DirTypeDef which_key(void)
 {

@@ -22,7 +22,7 @@ extern int em70xx_bpm_dynamic(int RECEIVED_BYTE, int g_sensor_x, int g_sensor_y,
 extern int em70xx_reset(int ref);
 extern kal_bool HRS_WriteBytes(kal_uint8 RegAddr, kal_uint8 Data);
 extern kal_bool HRS_ReadBytes(kal_uint8* Data, kal_uint8 RegAddr);
-
+void HRS_I2C_INIT(void);
 void EM7028_hrs_init(void);
 void EM7028_hrs_get_data(void);
 void EM7028_enable(kal_uint8 enable);

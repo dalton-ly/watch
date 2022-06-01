@@ -49,7 +49,7 @@ void EM70X8_blood50ms_get_data(void);
 #define EM7028_OFFSET_REG 		    0x08	
 #define EM7028_GAIN_REG 		    	0x0A	
 #define EM7028_CONFIG_REG		   	  0x0D	
-
+kal_bool test1,test2,test3,test4,test5,test6;
 //收缩压systolic pressure
 //舒张压diastolic pressure
 
@@ -89,11 +89,12 @@ void EM70X8_blood500ms_get_data(void)
 }
 void EM7028_hrs_init()
 {
-	HRS_WriteBytes(EM7028_ENABLE_REG,0x08);//首先启动连续测量模式
-	HRS_WriteBytes(EM7028_OFFSET_REG,0x00);
-	HRS_WriteBytes(EM7028_GAIN_REG,0x7f);
-	HRS_WriteBytes(EM7028_CONFIG_REG,0xc7);
-	HRS_WriteBytes(0x0e,0x06);
+	test1=HRS_WriteBytes(0x00,0x00);
+	test1=HRS_WriteBytes(EM7028_ENABLE_REG,0x08);//首先启动连续测量模式
+	test2=HRS_WriteBytes(EM7028_OFFSET_REG,0x00);
+	test3=HRS_WriteBytes(EM7028_GAIN_REG,0x7f);
+	test3=HRS_WriteBytes(EM7028_CONFIG_REG,0xc7);
+	test3=HRS_WriteBytes(0x0e,0x06);
 	//EM7028_hrs_pid();
 	faraway_hand_f=0;
 	em70xx_reset(0);

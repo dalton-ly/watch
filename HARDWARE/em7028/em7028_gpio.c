@@ -98,7 +98,7 @@ static void HRS_i2c_begin(void)
 	HRS_I2C_CLK_HIGH;
 	HRS_i2c_udelay(2);//(20);//(40); 	//20
 	HRS_I2C_DATA_LOW;
-	HRS_i2c_udelay(2);//(20);		//10
+	HRS_i2c_udelay(5);//(20);		//10
 	HRS_I2C_CLK_LOW;
 	HRS_i2c_udelay(20);//(20);		//10
 }
@@ -109,10 +109,10 @@ static void HRS_i2c_begin(void)
 
 static void HRS_i2c_end(void)
 {	
-	HRS_I2C_DATA_OUTPUT();
 	HRS_i2c_udelay(10);		//10
 	HRS_I2C_CLK_HIGH;
 	HRS_i2c_udelay(20);		//10
+	HRS_I2C_DATA_OUTPUT();
 	HRS_I2C_DATA_HIGH;
 	//HRS_i2c_udelay(10);		//10
 	//HRS_i2c_udelay(10);		//10
@@ -196,7 +196,7 @@ void HRS_SendByte(kal_uint8 sData)
 		{ 
 			HRS_I2C_DATA_LOW;
 		}
-		HRS_i2c_one_clk();                        
+		HRS_i2c_one_clk();    //上升沿传输数据，回到低电平数据变化                    
 	}		
 }
 
@@ -204,10 +204,10 @@ static kal_bool HRS_Chkack(void)
 {
 	kal_bool result = KAL_FALSE;
 
-	HRS_I2C_DATA_INPUT();
-	HRS_i2c_udelay(2);		//5
-	HRS_I2C_CLK_HIGH;
-	HRS_i2c_udelay(2);		//5
+	HRS_I2C_DATA_INPUT();	//切换为input 拉高
+	HRS_i2c_udelay(5);		//5
+	HRS_I2C_CLK_HIGH;		//clk也拉高
+	HRS_i2c_udelay(5);		//5
 
 	if(HRS_I2C_GET_BIT)		//Non-ack
 	{
@@ -306,7 +306,7 @@ kal_bool HRS_WriteBytes(kal_uint8 RegAddr, kal_uint8 Data)
 {
 	HRS_i2c_begin();						//start bit
 
-	HRS_SendByte(HRS_DEVICE_WRITE_ADDRESS);		//slave address|write bit
+	HRS_SendByte(HRS_DEVICE_WRITE_ADDRESS);		//slave address|write bit 发送完成后SDA不确定高低  clk为低，且只有clk为低时才允许变化
 	if(KAL_FALSE == HRS_Chkack())		//check Ack bit
 	{
 		

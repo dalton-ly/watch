@@ -3,6 +3,7 @@
 #include "em7028.h"
 #include "blood.h"
 
+
 //#define __EM7028_DEBUG__
 #if defined(__EM7028_DEBUG__)
 #define EM7028_TRACE  printf
@@ -49,6 +50,9 @@ void EM70X8_blood50ms_get_data(void);
 #define EM7028_OFFSET_REG 		    0x08	
 #define EM7028_GAIN_REG 		    	0x0A	
 #define EM7028_CONFIG_REG		   	  0x0D	
+
+kal_uint8  data_l = 0x00;
+kal_uint8  data_h = 0x00;
 kal_bool test1,test2,test3,test4,test5,test6;
 //收缩压systolic pressure
 //舒张压diastolic pressure
@@ -108,18 +112,17 @@ volatile unsigned long sensor_data;
 
 void EM7028_hrs_get_data()
 {
-	kal_uint8  data_l = 0x00;
-	kal_uint8  data_h = 0x00;
+
 
 	if(faraway_hand_f)
 	{
         //Pluse Mode HRS2
-		HRS_ReadBytes(&data_l,0x20);//HRS2_DATA0[7:0]
-		HRS_ReadBytes(&data_h,0x21);//HRS2_DATA0[15:8]
-		data = (data_h <<8) | data_l;
+		test5 = HRS_ReadBytes(&data_l,0x20);//HRS2_DATA0[7:0]
+		test6 = HRS_ReadBytes(&data_h,0x21);//HRS2_DATA0[15:8]
+		data = (data_h <<8) | data_l;//左移八位取或
 		if(data > 10)
 		{
-			HRS_WriteBytes(EM7028_ENABLE_REG,0x08);//Start Continuous Mode 
+			test1 = HRS_WriteBytes(EM7028_ENABLE_REG,0x08);//Start Continuous Mode 
 			faraway_hand_f=0;
 			em70xx_reset(0);
 		}
@@ -128,12 +131,12 @@ void EM7028_hrs_get_data()
     {
         //Continuous Mode HRS1 
         
-        HRS_ReadBytes(&data_l,0x30);//HRS1_DATA0[7:0]
-        HRS_ReadBytes(&data_h,0x31);//HRS1_DATA0[15:8]
+        test2 = HRS_ReadBytes(&data_l,0x30);//HRS1_DATA0[7:0]
+        test3 = HRS_ReadBytes(&data_h,0x31);//HRS1_DATA0[15:8]
         data = (data_h <<8) | data_l;
         if((data<10000||data>60000))
         {
-            HRS_WriteBytes(EM7028_ENABLE_REG,0x80);//Start Pluse Mode To Measure Distance
+            test4 = HRS_WriteBytes(EM7028_ENABLE_REG,0x80);//Start Pluse Mode To Measure Distance
             em70xx_reset(0);
             faraway_hand_f=1;
         }
@@ -145,8 +148,9 @@ void EM7028_hrs_get_data()
     
     bpm_data = em70xx_bpm_dynamic(data,0,0,0);
 
+		
     Blood_Process();
-    // Get_Hr(bpm_data);
+    //Get_Hr(bpm_data);
     blood_h = GET_BP_MAX();
     blood_l = GET_BP_MIN();
 
@@ -156,6 +160,7 @@ void EM7028_hrs_get_data()
         if ( count_hr > 10 )
         {
             bpm_value = num_hr / 10;
+						heart_data = bpm_value;
             count_hr = 0;
             num_hr = 0;
         }

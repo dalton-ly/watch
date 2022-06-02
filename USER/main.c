@@ -123,6 +123,7 @@ int main(void)
 	MPU9250_Init();		// MPU9250初始化
 	HRS_I2C_INIT();
 	EM7028_hrs_init();	//心率获取初始化
+	EM7028_hrs_get_data();
 	// BME280_Init();
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
@@ -318,7 +319,7 @@ void APP_TaskCreate(void)
 	OSTmrCreate(&display_timer, "display timer", 900, 0, OS_OPT_TMR_ONE_SHOT, display_tim_callback, NULL, &err);
 	OSTmrCreate(&heartrate_timer_50,"50ms processe",0,5,OS_OPT_TMR_PERIODIC,heartrate_tim_callback_50,NULL,&err);//创建50ms的周期定时器，无延时,定时频率为100Hz，10ms
 	OSTmrCreate(&heartrate_timer_500,"500ms processe",0,50,OS_OPT_TMR_PERIODIC,heartrate_tim_callback_500,NULL,&err);//创建50m0s的周期定时器
-	OSTmrCreate(&heartrate_get_data,"get data",0,3,OS_OPT_TMR_PERIODIC,heartrate_callback_get_data,NULL,&err);//创建50m0s的周期定时器
+	OSTmrCreate(&heartrate_get_data,"get data",0,100,OS_OPT_TMR_PERIODIC,heartrate_callback_get_data,NULL,&err);//创建50m0s的周期定时器
 	OS_TaskSuspend(&HeartTaskTCB,&err);//挂起心率测量任务，进入到app中再解挂
 	IWatchDog_Init();								 //独立看门狗初始化
 	OS_CRITICAL_EXIT();								 //退出临界区
@@ -506,17 +507,17 @@ void heart_task(void *p_arg) //在进入界面解挂时开始调用
 	OS_ERR err;
 	p_arg = p_arg;
 	CPU_SR_ALLOC();
+	OSTmrStart(&heartrate_timer_50,&err);
+	OSTmrStart(&heartrate_timer_500,&err);//启动两个定时器处理心率数据
+	OSTmrStart(&heartrate_get_data,&err);	
 	while (1)
 	{
-		OSTmrStart(&heartrate_timer_50,&err);
-		OSTmrStart(&heartrate_timer_500,&err);//启动两个定时器处理心率数据
-		OSTmrStart(&heartrate_get_data,&err);
 		OS_CRITICAL_ENTER();
-		if (heart_tmp != heart_data && heart_data != 0) //心率有变化时更新数据
-		{
+		//if (heart_tmp != heart_data && heart_data != 0) //心率有变化时更新数据
+		//{
 			app_heartrate_update(heart_data);
-			heart_tmp = heart_data;
-		}
+		//	heart_tmp = heart_data;
+		//}
 		OS_CRITICAL_EXIT();
 		OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &err);
 	}
@@ -742,37 +743,23 @@ static void move_task_compass(Move_DirTypeDef dir)
 
 static void move_task_heartrate(Move_DirTypeDef dir)
 {
+	OS_ERR err;
 	switch (dir)
 	{
 	case MOVE_LEFT:
 		Disp = Disp_Menu;
-		app_heartrate_anim_Vexit(true); //将about界面退出
+		app_heartrate_anim_Vexit(true); //将界面退出
 		app_menu_anim_Hexit(id, false); //移入菜单界面
+		OS_TaskSuspend((OS_TCB*)&HeartTaskTCB,&err);
+		OSTmrStop(&heartrate_timer_50,OS_OPT_TMR_NONE,heartrate_tim_callback_50,&err);
+		OSTmrStop(&heartrate_timer_500,OS_OPT_TMR_NONE,heartrate_tim_callback_500,&err);//启动两个定时器处理心率数据
+		OSTmrStop(&heartrate_get_data,OS_OPT_TMR_NONE,heartrate_callback_get_data,&err);	
 		break;
 	default:
 		break;
 	}
 }
 
-//动作扫描函数
-/*static Move_DirTypeDef Move_Scan(void)
-{
-	AngleGyro_TypeDef *ag_t;
-
-	ag_t = Get_Angle_GyroxStructure();
-
-	if ((ag_t->pitch < 160.0f) && (ag_t->pitch > 0))
-		return MOVE_DOWN;
-	else if ((ag_t->pitch > -160.0f) && (ag_t->pitch < 0))
-		return MOVE_UP;
-	else if ((ag_t->roll < 160.0f) && (ag_t->roll > 0))
-		return MOVE_LEFT;
-	else if ((ag_t->roll > -160.0f) && (ag_t->roll < 0))
-		return MOVE_RIGHT;
-	else
-		return MOVE_NONE;
-}
-*/
 //新建一个按键读取按键 返回哪个按键被按下
 static Move_DirTypeDef which_key(void)
 {

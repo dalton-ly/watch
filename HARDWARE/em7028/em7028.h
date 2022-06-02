@@ -2,7 +2,7 @@
 #define __EM70X8_H__
 
 #include "stdint.h"
-
+extern unsigned int heart_data;
 #define kal_int8	int8_t
 #define kal_uint8	uint8_t
 #define kal_bool  uint8_t

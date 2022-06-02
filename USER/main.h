@@ -27,7 +27,7 @@
 
 #include "em7028.h"
 //#include "BME280.h"
-extern unsigned int heart_data=0;//心率数据
+unsigned int heart_data=0;//心率数据
 unsigned char heart_tmp = 0;
 
 typedef enum

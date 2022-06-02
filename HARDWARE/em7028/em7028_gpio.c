@@ -283,10 +283,10 @@ kal_bool HRS_ReadBytes(kal_uint8* Data, kal_uint8 RegAddr)
 		return KAL_FALSE;
 	}
 
-	HRS_Restart();						//restart bit
+	HRS_Restart();						//restart bit 两条线都为低电平
 
-	HRS_SendByte(HRS_DEVICE_READ_ADDRESS);		//slave address|read bit
-	if(KAL_FALSE == HRS_Chkack())
+	HRS_SendByte(HRS_DEVICE_READ_ADDRESS);	//发送完成sda不定，clk为低电平	//slave address|read bit
+	if(KAL_FALSE == HRS_Chkack())//检查完毕后两者都为低电平
 	{
 		
 		HRS_i2c_end();

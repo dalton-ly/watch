@@ -1,13 +1,13 @@
 #include "app_heartrate.h"
 #include "app_anim.h"
-
+#include <stdio.h>
 
 static lv_obj_t *cont; //页面容器
 
 static lv_obj_t *label_hr;  //显示心率
 static const char *hr_text = "Heartrate:";
 static lv_obj_t *label_data;	//心率数据label
-static char display_text[]="60";
+static char display_text[]="test";
 //创建关于界面
 void app_heartrate_create(void)
 {
@@ -55,19 +55,11 @@ void app_heartrate_create(void)
 
 void app_heartrate_update(unsigned int data) //更新心率数据并显示
 {
-	// int i, max_bits;
 
-	// max_bits = dec_get_bits(data); //计算角度数值有几位
-
-	// for (i = 0; i < max_bits; i++)
-	// {
-	// 	display_text[max_bits - i - 1] = data % 10 + '0';//int 转为char
-	// 	data /= 10;
-	// }
-	// //display_text[i] = '\'';
-	// display_text[i] = '\0';
-
-	lv_label_set_text_fmt(label_data, "%d",data); //设置显示文本: 角度
+	//sprintf(display_text,"Hr:%d",data);
+	//app_heartrate_anim_Vexit(true); //将界面退出
+	//lv_label_set_static_text(label_data,display_text);
+	lv_label_set_text_fmt(label_data, "Hr:%d",data); //设置显示文本: 角度
 }
 
 

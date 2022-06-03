@@ -22,6 +22,7 @@
 #include "app_compass.h"
 #include "app_humidity.h"
 
+#include "app_heartrate.h"
 #include "lvgl.h"
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
@@ -29,13 +30,19 @@
 #include "BME280.h"
 
 #include "i2c.h"
+#include "em7028.h"
+//#include "BME280.h"
+unsigned int heart_data=0;//心率数据
+unsigned char heart_tmp = 0;
+
 typedef enum
 {
 	Disp_Menu = -1,
 	Disp_Compass,
 	Disp_Setting,
 	Disp_About,
-	Disp_Humidity
+	Disp_Humidity,
+	Disp_Heartrate
 } Display_TypeDef; //当前界面枚举
 
 typedef enum
@@ -125,6 +132,18 @@ OS_TCB MoveTaskTCB;
 CPU_STK MOVE_TASK_STK[MOVE_STK_SIZE];
 void move_task(void *p_arg);
 
+
+//任务优先级
+#define HEART_TASK_PRIO 11
+//任务堆栈大小
+#define HEART_STK_SIZE 512
+//任务控制块
+OS_TCB HeartTaskTCB;
+//任务堆栈
+CPU_STK HEART_TASK_STK[HEART_STK_SIZE];
+void heart_task(void *p_arg);
+
+
 //任务优先级
 #define TIME_TASK_PRIO 12
 //任务堆栈大小
@@ -159,8 +178,17 @@ OS_TCB Led0TaskTCB;
 CPU_STK LED0_TASK_STK[LED0_STK_SIZE];
 void led0_task(void *p_arg);
 
+
 //息屏软件定时器
 OS_TMR display_timer;
 void display_tim_callback(void *p_tmr, void *p_arg);
 
+
+//心率定时器
+OS_TMR heartrate_timer_50;
+OS_TMR heartrate_timer_500;
+OS_TMR heartrate_get_data;
+void heartrate_tim_callback_50(void *p_tmr,void *p_arg);
+void heartrate_tim_callback_500(void *p_tmr,void *p_arg);
+void heartrate_callback_get_data(void *p_tmr,void *p_arg);
 #endif

@@ -13,9 +13,9 @@ static void move_task_about(Move_DirTypeDef dir);
 static void move_task_setting(Move_DirTypeDef dir);
 static void move_task_compass(Move_DirTypeDef dir);
 static void move_task_humidity(Move_DirTypeDef dir);
+static void move_task_heartrate(Move_DirTypeDef dir);
 static Move_DirTypeDef which_key(void);
-static Move_DirTypeDef Move_Scan(void);
-
+// static Move_DirTypeDef Move_Scan(void);
 
 static Display_TypeDef Disp = Disp_Menu; //当前界面 菜单一个界面，包含几个图片的选择。
 static int8_t id = -1;					 //菜单id，默认为时间界面
@@ -33,22 +33,22 @@ static AngleGyro_TypeDef *ag_t;
 
 //按键检测函数
 
-GPIO_PinState Key_Scan(GPIO_TypeDef *GPIOx,uint16_t GPIO_PIN)
+GPIO_PinState Key_Scan(GPIO_TypeDef *GPIOx, uint16_t GPIO_PIN)
 {
-    if (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == GPIO_PIN_RESET)
-    {
+	if (HAL_GPIO_ReadPin(GPIOx, GPIO_PIN) == GPIO_PIN_RESET)
+	{
 		delay_ms(10);
-		if (HAL_GPIO_ReadPin(GPIOx,GPIO_PIN) == GPIO_PIN_RESET)
-		{	
+		if (HAL_GPIO_ReadPin(GPIOx, GPIO_PIN) == GPIO_PIN_RESET)
+		{
 			return GPIO_PIN_RESET;
 		}
 		else
+			return GPIO_PIN_SET;
+	}
+	else
+	{
 		return GPIO_PIN_SET;
-    }
-    else
-    {
-        return GPIO_PIN_SET;
-    }   
+	}
 }
 
 void Power_Init(void)
@@ -60,7 +60,7 @@ void Power_Init(void)
 
 	GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
 	GPIO_InitStructure.Pull = GPIO_PULLUP;
-	GPIO_InitStructure.Pin = GPIO_PIN_0 | GPIO_PIN_1; //3.3V电源保持控制接口
+	GPIO_InitStructure.Pin = GPIO_PIN_0 | GPIO_PIN_1; // 3.3V电源保持控制接口
 	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
@@ -69,34 +69,32 @@ void Power_Init(void)
 	GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	Power_On();//PA0 和PA1设置为1
+	Power_On(); // PA0 和PA1设置为1
 }
 
-
-void SW_Init(void)//按键引脚初始化
+void SW_Init(void) //按键引脚初始化
 {
-	GPIO_InitTypeDef GPIO_InitStructure_SW1={0};
-	GPIO_InitTypeDef GPIO_InitStructure_SW2={0};
+	GPIO_InitTypeDef GPIO_InitStructure_SW1 = {0};
+	GPIO_InitTypeDef GPIO_InitStructure_SW2 = {0};
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
-	GPIO_InitStructure_SW1.Mode=GPIO_MODE_INPUT;
+	GPIO_InitStructure_SW1.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStructure_SW1.Pin = GPIO_PIN_10;
-	GPIO_InitStructure_SW1.Pull=GPIO_PULLUP;
-	//GPIO_InitStructure_SW1.Speed = GPIO_SPEED_HIGH;
+	GPIO_InitStructure_SW1.Pull = GPIO_PULLUP;
+	// GPIO_InitStructure_SW1.Speed = GPIO_SPEED_HIGH;
 
-	
-	GPIO_InitStructure_SW2.Mode=GPIO_MODE_INPUT;
-	GPIO_InitStructure_SW2.Pin = GPIO_PIN_14 | GPIO_PIN_15;	
-	GPIO_InitStructure_SW2.Pull=GPIO_PULLUP;
-	//GPIO_InitStructure_SW2.Speed = GPIO_SPEED_HIGH;
+	GPIO_InitStructure_SW2.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStructure_SW2.Pin = GPIO_PIN_14 | GPIO_PIN_15;
+	GPIO_InitStructure_SW2.Pull = GPIO_PULLUP;
+	// GPIO_InitStructure_SW2.Speed = GPIO_SPEED_HIGH;
 	HAL_GPIO_Init(SW1_PORT, &GPIO_InitStructure_SW1);
 	HAL_GPIO_Init(SW23_PORT, &GPIO_InitStructure_SW2);
 }
 
-//bme初始化函数
+// bme初始化函数
 
- void BME280_Init()
+/*void BME280_Init()
 {
 	int8_t rslt = BME280_OK;
 	uint8_t dev_addr = BME280_I2C_ADDR_PRIM;
@@ -106,11 +104,8 @@ void SW_Init(void)//按键引脚初始化
 	dev.write = user_i2c_write;
 	dev.delay_us = user_delay_us;
 	rslt = bme280_init(&dev);
-} 
-
-
-
-
+}
+*/
 
 int main(void)
 {
@@ -120,19 +115,22 @@ int main(void)
 	HAL_Init();						 //初始化HAL库
 	delay_init(100);				 //初始化延时函数
 	Power_Init();					 //初始化电源控制
-	LED_Init();						 //初始化LED 或许可以去除？
-	LCD_Init();						 //初始化LCD
-	SW_Init();						//按键初始化
-	i2c_init();
-	Bat_ADC_Init();					 //初始化ADC
-	PCF8563_I2C_Init();				 //PCF8563初始化 在其中定义了通信速率和i2c实例
-	Kalman_Init();					 //卡尔曼参数初始化
-	MPU9250_Init();					 //MPU9250初始化
-	BME280_Init();					 //BME280的初始化
+	// LED_Init();						 //初始化LED 或许可以去除？
+	LCD_Init(); //初始化LCD
+	SW_Init();
+	Bat_ADC_Init();		//初始化ADC
+	PCF8563_I2C_Init(); // PCF8563初始化 在其中定义了通信速率和i2c实例
+	Kalman_Init();		//卡尔曼参数初始化
+	MPU9250_Init();		// MPU9250初始化
+	HRS_I2C_INIT();
+	EM7028_hrs_init();	//心率获取初始化
+	EM7028_hrs_get_data();
+	//i2c_init();
+	// BME280_Init();
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
-	lv_init();			 //lvgl 系统初始化
-	lv_port_disp_init(); //lvgl 显示接口初始化,放在 lv_init()的后面
+	lv_init();			 // lvgl 系统初始化
+	lv_port_disp_init(); // lvgl 显示接口初始化,放在 lv_init()的后面
 
 	OSInit(&err);		 //初始化UCOSIII
 	OS_CRITICAL_ENTER(); //进入临界区
@@ -156,8 +154,6 @@ int main(void)
 	while (1)
 		;
 }
-
-
 
 //开始任务函数
 void start_task(void *p_arg)
@@ -187,7 +183,7 @@ void start_task(void *p_arg)
 				 (CPU_CHAR *)"lvgl task",
 				 (OS_TASK_PTR)lvgl_task,
 				 (void *)0,
-				 (OS_PRIO)LVGL_TASK_PRIO,		//优先级6
+				 (OS_PRIO)LVGL_TASK_PRIO, //优先级6
 				 (CPU_STK *)&LVGL_TASK_STK[0],
 				 (CPU_STK_SIZE)LVGL_STK_SIZE / 10,
 				 (CPU_STK_SIZE)LVGL_STK_SIZE,
@@ -213,7 +209,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"move task",
 				 (OS_TASK_PTR)move_task,
 				 (void *)0,
-				 (OS_PRIO)MOVE_TASK_PRIO,		//10
+				 (OS_PRIO)MOVE_TASK_PRIO, // 10
 				 (CPU_STK *)&MOVE_TASK_STK[0],
 				 (CPU_STK_SIZE)MOVE_STK_SIZE / 10,
 				 (CPU_STK_SIZE)MOVE_STK_SIZE,
@@ -227,7 +223,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"time task",
 				 (OS_TASK_PTR)time_task,
 				 (void *)0,
-				 (OS_PRIO)TIME_TASK_PRIO,		//12
+				 (OS_PRIO)TIME_TASK_PRIO, // 12
 				 (CPU_STK *)&TIME_TASK_STK[0],
 				 (CPU_STK_SIZE)TIME_STK_SIZE / 10,
 				 (CPU_STK_SIZE)TIME_STK_SIZE,
@@ -241,7 +237,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"led0 task",
 				 (OS_TASK_PTR)led0_task,
 				 (void *)0,
-				 (OS_PRIO)LED0_TASK_PRIO,		//15
+				 (OS_PRIO)LED0_TASK_PRIO, // 15
 				 (CPU_STK *)&LED0_TASK_STK[0],
 				 (CPU_STK_SIZE)LED0_STK_SIZE / 10,
 				 (CPU_STK_SIZE)LED0_STK_SIZE,
@@ -250,12 +246,13 @@ void APP_TaskCreate(void)
 				 (void *)0,
 				 (OS_OPT)OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR | OS_OPT_TASK_SAVE_FP,
 				 (OS_ERR *)&err);
+
 	//创建BAT任务
 	OSTaskCreate((OS_TCB *)&BatTaskTCB,
 				 (CPU_CHAR *)"bat task",
 				 (OS_TASK_PTR)bat_task,
 				 (void *)0,
-				 (OS_PRIO)BAT_TASK_PRIO,		//9
+				 (OS_PRIO)BAT_TASK_PRIO, // 9
 				 (CPU_STK *)&BAT_TASK_STK[0],
 				 (CPU_STK_SIZE)BAT_STK_SIZE / 10,
 				 (CPU_STK_SIZE)BAT_STK_SIZE,
@@ -269,7 +266,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"imu task",
 				 (OS_TASK_PTR)imu_task,
 				 (void *)0,
-				 (OS_PRIO)IMU_TASK_PRIO,		//5
+				 (OS_PRIO)IMU_TASK_PRIO, // 5
 				 (CPU_STK *)&IMU_TASK_STK[0],
 				 (CPU_STK_SIZE)IMU_STK_SIZE / 10,
 				 (CPU_STK_SIZE)IMU_STK_SIZE,
@@ -283,7 +280,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"compass task",
 				 (OS_TASK_PTR)compass_task,
 				 (void *)0,
-				 (OS_PRIO)COMPASS_TASK_PRIO,		//7
+				 (OS_PRIO)COMPASS_TASK_PRIO, // 7
 				 (CPU_STK *)&COMPASS_TASK_STK[0],
 				 (CPU_STK_SIZE)COMPASS_STK_SIZE / 10,
 				 (CPU_STK_SIZE)COMPASS_STK_SIZE,
@@ -297,7 +294,7 @@ void APP_TaskCreate(void)
 				 (CPU_CHAR *)"temperature task",
 				 (OS_TASK_PTR)temperature_task,
 				 (void *)0,
-				 (OS_PRIO)TEMPERATURE_TASK_PRIO,		//8
+				 (OS_PRIO)TEMPERATURE_TASK_PRIO, // 8
 				 (CPU_STK *)&TEMPERATURE_TASK_STK[0],
 				 (CPU_STK_SIZE)TEMPERATURE_STK_SIZE / 10,
 				 (CPU_STK_SIZE)TEMPERATURE_STK_SIZE,
@@ -320,12 +317,28 @@ void APP_TaskCreate(void)
 				 (void *)0,
 				 (OS_OPT)OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR | OS_OPT_TASK_SAVE_FP,
 				 (OS_ERR *)&err);
-
+	//创建心率测量任务
+	OSTaskCreate((OS_TCB *)&HeartTaskTCB,
+				 (CPU_CHAR *)"heart task",
+				 (OS_TASK_PTR)heart_task,
+				 (void *)0,
+				 (OS_PRIO)HEART_TASK_PRIO, // 11
+				 (CPU_STK *)&HEART_TASK_STK[0],
+				 (CPU_STK_SIZE)HEART_STK_SIZE / 10,
+				 (CPU_STK_SIZE)HEART_STK_SIZE,
+				 (OS_MSG_QTY)0,
+				 (OS_TICK)0,
+				 (void *)0,
+				 (OS_OPT)OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR | OS_OPT_TASK_SAVE_FP,
+				 (OS_ERR *)&err);
 	//创建息屏控制软件定时器
 	OSTmrCreate(&display_timer, "display timer", 900, 0, OS_OPT_TMR_ONE_SHOT, display_tim_callback, NULL, &err);
-	OS_TaskSuspend((OS_TCB *)&CompassTaskTCB, &err); //挂起COMPASS任务 发生调度 
-	IWatchDog_Init();		//独立看门狗初始化
-	OS_CRITICAL_EXIT(); //退出临界区
+	OSTmrCreate(&heartrate_timer_50,"50ms processe",0,5,OS_OPT_TMR_PERIODIC,heartrate_tim_callback_50,NULL,&err);//创建50ms的周期定时器，无延时,定时频率为100Hz，10ms
+	OSTmrCreate(&heartrate_timer_500,"500ms processe",0,50,OS_OPT_TMR_PERIODIC,heartrate_tim_callback_500,NULL,&err);//创建50m0s的周期定时器
+	OSTmrCreate(&heartrate_get_data,"get data",0,3,OS_OPT_TMR_PERIODIC,heartrate_callback_get_data,NULL,&err);//创建50m0s的周期定时器
+	OS_TaskSuspend(&HeartTaskTCB,&err);//挂起心率测量任务，进入到app中再解挂
+	IWatchDog_Init();								 //独立看门狗初始化
+	OS_CRITICAL_EXIT();								 //退出临界区
 }
 
 //息屏控制软件定时器
@@ -333,22 +346,37 @@ void display_tim_callback(void *p_tmr, void *p_arg)
 {
 	Power_Off();
 }
+//50ms心率处理定时器
+void heartrate_tim_callback_50(void *p_tmr,void *p_arg)
+{
+	EM70X8_blood50ms_get_data();
+}
+//500ms处理定时器
+void heartrate_tim_callback_500(void *p_tmr,void *p_arg)
+{
+	EM70X8_blood500ms_get_data();
+}
+//处理数据回调函数
+void heartrate_callback_get_data(void *p_tmr,void* p_arg)
+{
+	EM7028_hrs_get_data();
+}
 
-//IMU任务，优先级3
+// IMU任务，优先级3
 void imu_task(void *p_arg)
 {
 	OS_ERR err;
 
 	p_arg = p_arg;
-	
-	while(1)
+
+	while (1)
 	{
-		Update_Angle_Gyrox(); //更新姿态信息
+		Update_Angle_Gyrox();										//更新姿态信息
 		OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err); //延时100ms
 	}
 }
 
-//LVGL任务函数，优先级4
+// LVGL任务函数，优先级4
 void lvgl_task(void *p_arg)
 {
 	OS_ERR err;
@@ -358,7 +386,7 @@ void lvgl_task(void *p_arg)
 	app_show_start(); //显示开机图片
 	start_img_anim(); //开启开机图片动画
 
-	lv_task_handler(); //LVGL更新显示
+	lv_task_handler(); // LVGL更新显示
 
 	OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); //延时1S 这里是不是会发生一次调度？ 但是此时没有别的任务不影响
 	app_del_start();										  //删除开机图片
@@ -371,10 +399,10 @@ void lvgl_task(void *p_arg)
 	app_humidity_create();		//创建气压温度界面
 	
 
+	app_heartrate_create();		//创建心率界面
 	ag_t = Get_Angle_GyroxStructure();
-	
 	APP_TaskCreate(); //创建一些任务
-	
+
 	OSTmrStart(&display_timer, &err);
 
 	while (1)
@@ -391,12 +419,12 @@ void compass_task(void *p_arg)
 	CPU_SR_ALLOC();
 
 	p_arg = p_arg;
-	
-	while(1)
+
+	while (1)
 	{
 		OS_CRITICAL_ENTER(); //进入临界区
 		app_compass_update_angle(ag_t->yaw);
-		OS_CRITICAL_EXIT(); //退出临界区
+		OS_CRITICAL_EXIT();											//退出临界区
 		OSTimeDlyHMSM(0, 0, 0, 120, OS_OPT_TIME_HMSM_STRICT, &err); //延时120ms
 	}
 }
@@ -407,26 +435,26 @@ void temperature_task(void *p_arg)
 	OS_ERR err;
 	CPU_SR_ALLOC();
 	uint8_t i = 0;
-	int16_t real_temperature;		//实时温度数值
-	int16_t min_temperature = 0x7fff;		//历史温度最小值
+	int16_t real_temperature;		  //实时温度数值
+	int16_t min_temperature = 0x7fff; //历史温度最小值
 
 	p_arg = p_arg;
-	
-	while(1)
+
+	while (1)
 	{
-		OS_CRITICAL_ENTER(); //进入临界区
-		real_temperature = MPU_Get_Temperature() / 10;		//读1次温度
-		if(min_temperature > real_temperature)
-			min_temperature = real_temperature;		//保存最小值
-		OS_CRITICAL_EXIT(); //退出临界区
-		
-		if(++i == 11)
+		OS_CRITICAL_ENTER();						   //进入临界区
+		real_temperature = MPU_Get_Temperature() / 10; //读1次温度
+		if (min_temperature > real_temperature)
+			min_temperature = real_temperature; //保存最小值
+		OS_CRITICAL_EXIT();						//退出临界区
+
+		if (++i == 11)
 		{
 			i = 0;
-			app_temperature_update(min_temperature);		//将10次采集的最小温度值更新到显示
-			min_temperature = 0x7fff;		//重置历史最小值
+			app_temperature_update(min_temperature); //将10次采集的最小温度值更新到显示
+			min_temperature = 0x7fff;				 //重置历史最小值
 		}
-		
+
 		OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &err); //延时200ms
 	}
 }
@@ -443,17 +471,17 @@ void bat_task(void *p_arg)
 	while (1)
 	{
 		chg_state = Charging_State(); //查询是否在充电
-		voltage = Bat_GetValue();		 //获取电压值
+		voltage = Bat_GetValue();	  //获取电压值
 		if (chg_state)
 			voltage -= 2;										  //如果在充电需要减去
-		voltage = (voltage - 3400) / 8;						  //计算电压百分比
-		app_update_bat(voltage > 100 ? 100 : voltage, chg_state);						  //更新电量显示
-		
+		voltage = (voltage - 3400) / 8;							  //计算电压百分比
+		app_update_bat(voltage > 100 ? 100 : voltage, chg_state); //更新电量显示
+
 		OSTimeDlyHMSM(0, 0, 2, 0, OS_OPT_TIME_HMSM_STRICT, &err); //延时2S
 	}
 }
 
-//MOVE任务，优先级10
+// MOVE任务，优先级10
 void move_task(void *p_arg)
 {
 	OS_ERR err;
@@ -462,8 +490,8 @@ void move_task(void *p_arg)
 
 	while (1)
 	{
-		//dir=Move_Scan(); //姿态扫描
-		dir=which_key();
+		// dir=Move_Scan(); //姿态扫描
+		dir = which_key();
 		if (dir == MOVE_NONE)
 			OSTmrStart(&display_timer, &err); //重新启动定时器计时
 
@@ -484,6 +512,9 @@ void move_task(void *p_arg)
 		case Disp_Humidity:
 			move_task_humidity(dir);
 			break;
+		case Disp_Heartrate:
+			move_task_heartrate(dir);
+			break;
 		default:
 			break;
 		}
@@ -492,7 +523,29 @@ void move_task(void *p_arg)
 	}
 }
 
-//time时间获取与更新任务，优先级12
+//创建心率任务
+void heart_task(void *p_arg) //在进入界面解挂时开始调用
+{
+	OS_ERR err;
+	p_arg = p_arg;
+	CPU_SR_ALLOC();
+	OSTmrStart(&heartrate_timer_50,&err);
+	OSTmrStart(&heartrate_timer_500,&err);//启动两个定时器处理心率数据
+	OSTmrStart(&heartrate_get_data,&err);	
+	while (1)
+	{
+		OS_CRITICAL_ENTER();
+		//if (heart_tmp != heart_data && heart_data != 0) //心率有变化时更新数据
+		//{
+			app_heartrate_update(heart_data);
+		//	heart_tmp = heart_data;
+		//}
+		OS_CRITICAL_EXIT();
+		OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &err);
+	}
+}
+
+// time时间获取与更新任务，优先级12
 void time_task(void *p_arg)
 {
 	OS_ERR err;
@@ -509,7 +562,7 @@ void time_task(void *p_arg)
 
 	app_init_time_data(&time); //这里需要先获取一次RTC时间，初始化显示
 
-	while(1)
+	while (1)
 	{
 		//获取时间间隔为500ms
 		PCF8563_ReadTime(&rtc_t);
@@ -523,11 +576,10 @@ void time_task(void *p_arg)
 
 		app_update_time(&time);										//更新时间
 		app_update_date(&date);										//更新日期
-		if(Disp != Disp_Setting)		//不在setting界面时更新roller
-			app_setting_update_roller(&rtc_t);					//更新时间设置roller
-		IWatch_Feed();		//喂狗
+		if (Disp != Disp_Setting)									//不在setting界面时更新roller
+			app_setting_update_roller(&rtc_t);						//更新时间设置roller
+		IWatch_Feed();												//喂狗
 		OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err); //延时500ms
-		
 	}
 }
 
@@ -564,16 +616,16 @@ void led0_task(void *p_arg)
 	}
 }
 
-//MOVE任务菜单界面时改变界面
+// MOVE任务菜单界面时改变界面
 static void move_task_menu_change_display(Display_TypeDef disp_t)
 {
 	OS_ERR err;
-	
+
 	switch (disp_t)
 	{
 	case Disp_Compass:
-		app_compass_anim_Vexit(false); //将compass界面显示
-		OSTaskResume((OS_TCB *)&CompassTaskTCB, &err);		//解挂COMPASS任务,开始更新指南针角度
+		app_compass_anim_Vexit(false);				   //将compass界面显示
+		OSTaskResume((OS_TCB *)&CompassTaskTCB, &err); //解挂COMPASS任务,开始更新指南针角度
 		break;
 	case Disp_Setting:
 		app_setting_anim_Vexit(false); //将setting界面显示
@@ -583,6 +635,9 @@ static void move_task_menu_change_display(Display_TypeDef disp_t)
 		break;
 	case Disp_Humidity:
 		app_humidity_anim_Vexit(false);//显示温湿度气压信息
+	case Disp_Heartrate:
+		app_heartrate_anim_Vexit(false);
+		OSTaskResume((OS_TCB *)&HeartTaskTCB, &err); //解挂Heart任务,开始更新心率		
 		break;
 	default:
 		break;
@@ -618,7 +673,7 @@ static void move_task_menu(Move_DirTypeDef dir)
 			app_time_anim_Hexit(false);					   //主菜单退出
 			app_menu_anim_Vexit((uint8_t)(id + 1), false); //下一个向上(进入中心)
 		}
-		else if (id <= 1)
+		else if (id <= 2)
 		{
 			app_menu_anim_Vexit((uint8_t)id, false);
 			app_menu_anim_Vexit((uint8_t)(id + 1), false);
@@ -669,17 +724,17 @@ static void move_task_setting(Move_DirTypeDef dir)
 		app_menu_anim_Hexit(id, false); //移入菜单界面
 		break;
 	case MOVE_UP:
-		if(roller_index != 7)
+		if (roller_index != 7)
 		{
-			app_setting_change(index);		//设置当前选中roller的项(递增)
+			app_setting_change(index); //设置当前选中roller的项(递增)
 			index = index >= roller_max[roller_index] - 1 ? 0 : index + 1;
 		}
 		else
 		{
-			if(ag_t->imu_d.az > -4000)		//当朝右倾斜，且z轴较接近水平时设置时间
+			if (ag_t->imu_d.az > -4000) //当朝右倾斜，且z轴较接近水平时设置时间
 			{
-				app_setting_update_time(&rtc_t);		//将roller的数据更新到时间结构体
-				PCF8563_WriteTime(&rtc_t);					//往PCF8563写入新的时间
+				app_setting_update_time(&rtc_t); //将roller的数据更新到时间结构体
+				PCF8563_WriteTime(&rtc_t);		 //往PCF8563写入新的时间
 				Disp = Disp_Menu;
 				app_setting_anim_Vexit(true);	//将setting界面退出
 				app_menu_anim_Hexit(id, false); //移入菜单界面
@@ -687,20 +742,20 @@ static void move_task_setting(Move_DirTypeDef dir)
 		}
 		break;
 	case MOVE_DOWN:
-		if(roller_index != 7)
+		if (roller_index != 7)
 		{
-			app_setting_change(index);		//设置当前选中roller的项(递减)
+			app_setting_change(index); //设置当前选中roller的项(递减)
 			index = index < 1 ? roller_max[roller_index] - 1 : index - 1;
 		}
 		break;
 	case MOVE_RIGHT:
-		roller_index = roller_index >= 7  ? 0 : roller_index + 1;
-		app_setting_change_roller(roller_index);		//设置当前选中的roller
-		if(roller_index != 7)
-			index = app_setting_get_roller_index();		//更新当前选中roller的当前选中项
+		roller_index = roller_index >= 7 ? 0 : roller_index + 1;
+		app_setting_change_roller(roller_index); //设置当前选中的roller
+		if (roller_index != 7)
+			index = app_setting_get_roller_index(); //更新当前选中roller的当前选中项
 	case MOVE_NONE:
-			OSTmrStart(&display_timer, &err);		//重复开启息屏定时器, compass界面不息屏
-			break;
+		OSTmrStart(&display_timer, &err); //重复开启息屏定时器, compass界面不息屏
+		break;
 	default:
 		break;
 	}
@@ -710,20 +765,20 @@ static void move_task_setting(Move_DirTypeDef dir)
 static void move_task_compass(Move_DirTypeDef dir)
 {
 	OS_ERR err;
-	
+
 	switch (dir)
 	{
-		case MOVE_LEFT:
-			Disp = Disp_Menu;
-			OS_TaskSuspend((OS_TCB *)&CompassTaskTCB, &err); //挂起COMPASS任务
-			app_compass_anim_Vexit(true);	//将aompass界面退出
-			app_menu_anim_Hexit(id, false); //移入菜单界面
-			break;
-		case MOVE_NONE:
-			OSTmrStart(&display_timer, &err);		//重复开启息屏定时器, compass界面不息屏
-			break;
-		default:
-			break;
+	case MOVE_LEFT:
+		Disp = Disp_Menu;
+		OS_TaskSuspend((OS_TCB *)&CompassTaskTCB, &err); //挂起COMPASS任务
+		app_compass_anim_Vexit(true);					 //将aompass界面退出
+		app_menu_anim_Hexit(id, false);					 //移入菜单界面
+		break;
+	case MOVE_NONE:
+		OSTmrStart(&display_timer, &err); //重复开启息屏定时器, compass界面不息屏
+		break;
+	default:
+		break;
 	}
 }
 
@@ -741,45 +796,44 @@ static void move_task_humidity(Move_DirTypeDef dir)
 	}
 }
 
-//动作扫描函数
-static Move_DirTypeDef Move_Scan(void)
+static void move_task_heartrate(Move_DirTypeDef dir)
 {
-	AngleGyro_TypeDef *ag_t;
+	OS_ERR err;
+	switch (dir)
+	{
+	case MOVE_LEFT:
+		Disp = Disp_Menu;
+		app_heartrate_anim_Vexit(true); //将界面退出
+		app_menu_anim_Hexit(id, false); //移入菜单界面
+		OS_TaskSuspend((OS_TCB*)&HeartTaskTCB,&err);
+		OSTmrStop(&heartrate_timer_50,OS_OPT_TMR_NONE,heartrate_tim_callback_50,&err);
+		OSTmrStop(&heartrate_timer_500,OS_OPT_TMR_NONE,heartrate_tim_callback_500,&err);//启动两个定时器处理心率数据
+		OSTmrStop(&heartrate_get_data,OS_OPT_TMR_NONE,heartrate_callback_get_data,&err);	
+		break;
+	default:
+		break;
+	}
+}
 
-	ag_t = Get_Angle_GyroxStructure();
-
-	if ((ag_t->pitch < 160.0f) && (ag_t->pitch > 0))
-		return MOVE_DOWN;
-	else if ((ag_t->pitch > -160.0f) && (ag_t->pitch < 0))
+//新建一个按键读取按键 返回哪个按键被按下
+static Move_DirTypeDef which_key(void)
+{
+	if (Key_Scan(SW1_PORT, SW1) == GPIO_PIN_RESET)
+	{
 		return MOVE_UP;
-	else if ((ag_t->roll < 160.0f) && (ag_t->roll > 0))
-		return MOVE_LEFT;
-	else if ((ag_t->roll > -160.0f) && (ag_t->roll < 0))
-		return MOVE_RIGHT;
+	}
+	else if (Key_Scan(SW23_PORT, SW2) == GPIO_PIN_RESET)
+	{
+		return MOVE_DOWN;
+	}
+	else if (Key_Scan(SW23_PORT, SW3) == GPIO_PIN_RESET)
+	{
+		delay_ms(100);
+		if (Key_Scan(SW23_PORT, SW2) == GPIO_PIN_RESET)
+			return MOVE_LEFT;
+		else
+			return MOVE_RIGHT;
+	}
 	else
 		return MOVE_NONE;
 }
-//按键读取按键 返回哪个按键被按下
-static Move_DirTypeDef which_key(void)
-{
-	if (Key_Scan(SW1_PORT,SW1)==GPIO_PIN_RESET)//SW1向上移动
-	{
-		return MOVE_UP;
-	}
-	else if (Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)//SW2向下
-	{
-		return MOVE_DOWN;
-	}
-	else if (Key_Scan(SW23_PORT,SW3)==GPIO_PIN_RESET)//sw3向右，23同时按下向左（退出）
-	{
-		delay_ms(100);
-		if(Key_Scan(SW23_PORT,SW2)==GPIO_PIN_RESET)
-			return MOVE_LEFT;
-		else
-		return MOVE_RIGHT;
-	}
-	else 
-	return MOVE_NONE;		
-}
-
-

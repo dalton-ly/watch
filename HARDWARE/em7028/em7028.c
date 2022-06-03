@@ -102,13 +102,11 @@ void EM7028_hrs_init()
 	//EM7028_hrs_pid();
 	faraway_hand_f=0;
 	em70xx_reset(0);
-
+	//HRS_WriteBytes(EM7028_ENABLE_REG,0x08);
 	/*Before measuring the heart rate ,you should initialize the variable to call*/
 	count_hr = 0;
 	num_hr=0;
 }
-
-volatile unsigned long sensor_data;
 
 void EM7028_hrs_get_data()
 {
@@ -119,7 +117,7 @@ void EM7028_hrs_get_data()
         //Pluse Mode HRS2
 		test5 = HRS_ReadBytes(&data_l,0x20);//HRS2_DATA0[7:0]
 		test6 = HRS_ReadBytes(&data_h,0x21);//HRS2_DATA0[15:8]
-		data = (data_h <<8) | data_l;//左移八位取或
+		data = (data_h <<8) | data_l;
 		if(data > 10)
 		{
 			test1 = HRS_WriteBytes(EM7028_ENABLE_REG,0x08);//Start Continuous Mode 
@@ -131,8 +129,8 @@ void EM7028_hrs_get_data()
     {
         //Continuous Mode HRS1 
         
-        test2 = HRS_ReadBytes(&data_l,0x30);//HRS1_DATA0[7:0]
-        test3 = HRS_ReadBytes(&data_h,0x31);//HRS1_DATA0[15:8]
+        test2 = HRS_ReadBytes(&data_l,0x28);//HRS1_DATA0[7:0]
+        test3 = HRS_ReadBytes(&data_h,0x29);//HRS1_DATA0[15:8]
         data = (data_h <<8) | data_l;
         if((data<10000||data>60000))
         {
@@ -141,18 +139,13 @@ void EM7028_hrs_get_data()
             faraway_hand_f=1;
         }
         
-        sensor_data = data;
     }
 
     // bpm_data = em70xx_bpm_dynamic(data,em78x0_X,em78x0_Y,em78x0_Z);
     
     bpm_data = em70xx_bpm_dynamic(data,0,0,0);
 
-		
-    Blood_Process();
-    //Get_Hr(bpm_data);
-    blood_h = GET_BP_MAX();
-    blood_l = GET_BP_MIN();
+
 
     if ( (bpm_data > 54) && (bpm_data) < 150 )
     {
@@ -160,7 +153,7 @@ void EM7028_hrs_get_data()
         if ( count_hr > 10 )
         {
             bpm_value = num_hr / 10;
-						heart_data = bpm_value;
+			heart_data = bpm_value;
             count_hr = 0;
             num_hr = 0;
         }
@@ -190,7 +183,3 @@ void EM7028_enable(kal_uint8 enable)
 
 }
 
-int SEGGER_RTT_printf(unsigned BufferIndex, const char * sFormat, ...) 
-{
-  return 0;
-}

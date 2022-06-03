@@ -319,7 +319,7 @@ void APP_TaskCreate(void)
 	OSTmrCreate(&display_timer, "display timer", 900, 0, OS_OPT_TMR_ONE_SHOT, display_tim_callback, NULL, &err);
 	OSTmrCreate(&heartrate_timer_50,"50ms processe",0,5,OS_OPT_TMR_PERIODIC,heartrate_tim_callback_50,NULL,&err);//创建50ms的周期定时器，无延时,定时频率为100Hz，10ms
 	OSTmrCreate(&heartrate_timer_500,"500ms processe",0,50,OS_OPT_TMR_PERIODIC,heartrate_tim_callback_500,NULL,&err);//创建50m0s的周期定时器
-	OSTmrCreate(&heartrate_get_data,"get data",0,100,OS_OPT_TMR_PERIODIC,heartrate_callback_get_data,NULL,&err);//创建50m0s的周期定时器
+	OSTmrCreate(&heartrate_get_data,"get data",0,3,OS_OPT_TMR_PERIODIC,heartrate_callback_get_data,NULL,&err);//创建50m0s的周期定时器
 	OS_TaskSuspend(&HeartTaskTCB,&err);//挂起心率测量任务，进入到app中再解挂
 	IWatchDog_Init();								 //独立看门狗初始化
 	OS_CRITICAL_EXIT();								 //退出临界区

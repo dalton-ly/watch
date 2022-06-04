@@ -21,7 +21,6 @@
 #include "app_setting.h"
 #include "app_compass.h"
 #include "app_humidity.h"
-
 #include "app_heartrate.h"
 #include "lvgl.h"
 #include "lv_port_disp.h"

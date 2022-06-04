@@ -14,6 +14,7 @@
         "string.h": "c",
         "app_about.h": "c",
         "app_humidity.h": "c",
-        "bme280_defs.h": "c"
+        "bme280_defs.h": "c",
+        "app_heartrate.h": "c"
     }
 }

@@ -6,6 +6,7 @@ LV_IMG_DECLARE(setting);
 LV_IMG_DECLARE(compass);
 LV_IMG_DECLARE(about);
 LV_IMG_DECLARE(humidity_pic);
+LV_IMG_DECLARE(heartrate);
 
 static ICON_TypeDef menu[5] =//一个icono结构体数组
 {

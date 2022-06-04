@@ -15,13 +15,12 @@ static void move_task_compass(Move_DirTypeDef dir);
 static void move_task_humidity(Move_DirTypeDef dir);
 static void move_task_heartrate(Move_DirTypeDef dir);
 static Move_DirTypeDef which_key(void);
-// static Move_DirTypeDef Move_Scan(void);
 
 static Display_TypeDef Disp = Disp_Menu; //当前界面 菜单一个界面，包含几个图片的选择。
 static int8_t id = -1;					 //菜单id，默认为时间界面
 
 struct bme280_data bmedata;	//保存从bme280读取的数据
-struct bme280_dev dev;
+struct bme280_dev dev;	//bem280结构体
 static AngleGyro_TypeDef *ag_t;
 
 //定义按键
@@ -115,7 +114,6 @@ int main(void)
 	HAL_Init();						 //初始化HAL库
 	delay_init(100);				 //初始化延时函数
 	Power_Init();					 //初始化电源控制
-	// LED_Init();						 //初始化LED 或许可以去除？
 	LCD_Init(); //初始化LCD
 	SW_Init();
 	Bat_ADC_Init();		//初始化ADC
@@ -131,7 +129,7 @@ int main(void)
 
 	lv_init();			 // lvgl 系统初始化
 	lv_port_disp_init(); // lvgl 显示接口初始化,放在 lv_init()的后面
-
+	//app_humidity_create();
 	OSInit(&err);		 //初始化UCOSIII
 	OS_CRITICAL_ENTER(); //进入临界区
 	//创建开始任务
@@ -337,6 +335,7 @@ void APP_TaskCreate(void)
 	OSTmrCreate(&heartrate_timer_500,"500ms processe",0,50,OS_OPT_TMR_PERIODIC,heartrate_tim_callback_500,NULL,&err);//创建50m0s的周期定时器
 	OSTmrCreate(&heartrate_get_data,"get data",0,3,OS_OPT_TMR_PERIODIC,heartrate_callback_get_data,NULL,&err);//创建50m0s的周期定时器
 	OS_TaskSuspend(&HeartTaskTCB,&err);//挂起心率测量任务，进入到app中再解挂
+	OS_TaskSuspend(&HumidityTaskTCB,&err);//挂起心率测量任务，进入到app中再解挂
 	IWatchDog_Init();								 //独立看门狗初始化
 	OS_CRITICAL_EXIT();								 //退出临界区
 }
@@ -397,8 +396,6 @@ void lvgl_task(void *p_arg)
 	app_setting_create();		//创建"设置"界面
 	app_compass_create();		//创建"指南针"界面
 	app_humidity_create();		//创建气压温度界面
-	
-
 	app_heartrate_create();		//创建心率界面
 	ag_t = Get_Angle_GyroxStructure();
 	APP_TaskCreate(); //创建一些任务
@@ -523,7 +520,7 @@ void move_task(void *p_arg)
 	}
 }
 
-//创建心率任务
+//创建心率任务11
 void heart_task(void *p_arg) //在进入界面解挂时开始调用
 {
 	OS_ERR err;
@@ -593,7 +590,7 @@ void humidity_task(void* p_arg)
 	while(1)
 	{
 	OS_CRITICAL_ENTER();
-	stream_sensor_data_normal_mode(&dev,&bmedata);	
+	//stream_sensor_data_normal_mode(&dev,&bmedata);	
 	OS_CRITICAL_EXIT(); //退出临界区
 	OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &err); //延时200ms
 	}
@@ -635,6 +632,7 @@ static void move_task_menu_change_display(Display_TypeDef disp_t)
 		break;
 	case Disp_Humidity:
 		app_humidity_anim_Vexit(false);//显示温湿度气压信息
+		break;
 	case Disp_Heartrate:
 		app_heartrate_anim_Vexit(false);
 		OSTaskResume((OS_TCB *)&HeartTaskTCB, &err); //解挂Heart任务,开始更新心率		
@@ -673,12 +671,12 @@ static void move_task_menu(Move_DirTypeDef dir)
 			app_time_anim_Hexit(false);					   //主菜单退出
 			app_menu_anim_Vexit((uint8_t)(id + 1), false); //下一个向上(进入中心)
 		}
-		else if (id <= 2)
+		else if (id <= 3)
 		{
 			app_menu_anim_Vexit((uint8_t)id, false);
 			app_menu_anim_Vexit((uint8_t)(id + 1), false);
 		}
-		id = id >= 3 ? 3 : id + 1;
+		id = id >= 4 ? 4 : id + 1;
 		break;
 	case MOVE_RIGHT:
 		if (id != -1)

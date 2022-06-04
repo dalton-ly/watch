@@ -4,26 +4,10 @@
 
 extern struct bme280_data bmedata;
 
-//LV_IMG_DECLARE(humidity);   //气压温度图标
-/* LV_IMG_DECLARE(num0);
-LV_IMG_DECLARE(num1);
-LV_IMG_DECLARE(num2);
-LV_IMG_DECLARE(num3);
-LV_IMG_DECLARE(num4);
-LV_IMG_DECLARE(num5);
-LV_IMG_DECLARE(num6);
-LV_IMG_DECLARE(num7);
-LV_IMG_DECLARE(num8);
-LV_IMG_DECLARE(num9);
-LV_IMG_DECLARE(Point); */
-
 static lv_obj_t* cont;  // 界面容器
 static lv_obj_t* label_temper;  //温度标签
 static lv_obj_t* label_humidity;    //湿度标签
 static lv_obj_t* label_pressure;    //气压标签
-/* static lv_obj_t* data_temper;	//温度数据
-static lv_obj_t* data_pressure;	//气压数据
-static lv_obj_t* data_humidity;	//湿度数据 */
 
 static const char* temper_text="temperature:";
 static const char* humidity_text="humidity:";
@@ -33,8 +17,8 @@ static const char* pressure_text="pressure:";
 
 void app_humidity_create() //创建气压温度界面
 {
-    	lv_obj_t *scr;  //指向屏幕的指针
-        scr=lv_scr_act();   //获取当前屏幕
+    lv_obj_t *scr;  //指向屏幕的指针
+    scr=lv_scr_act();   //获取当前屏幕
         
     //设置容器属性    
     cont = lv_cont_create(scr, NULL);															//创建容器
@@ -48,22 +32,23 @@ void app_humidity_create() //创建气压温度界面
     //创建标签
     //三个标签由上到下
 	label_temper = lv_label_create(cont, NULL);																   //创建温度标签
-	lv_obj_set_style_local_text_font(label_temper, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_32); //设置字体20号
+	lv_obj_set_style_local_text_font(label_temper, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_20); //设置字体20号
 	lv_obj_set_style_local_text_color(label_temper, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_CYAN);		   //设置字体颜色
-	lv_label_set_text_fmt(label_temper, "temperature: %f",bmedata.temperature);    //
+	lv_label_set_text_static(label_temper,temper_text);    //
 	lv_obj_align(label_temper, NULL, LV_ALIGN_IN_TOP_MID, 0, 10);   //设置对齐
 
     label_pressure = lv_label_create(cont, NULL);																   //创建温度标签
-	lv_obj_set_style_local_text_font(label_pressure, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_32); //设置字体20号
+	lv_obj_set_style_local_text_font(label_pressure, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_20); //设置字体20号
 	lv_obj_set_style_local_text_color(label_pressure, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_CYAN);		   //设置字体颜色
 	lv_label_set_static_text(label_pressure, pressure_text);    //设置为静态字符串
-	lv_obj_align(label_pressure, label_temper, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);   //设置对齐
+	lv_obj_align(label_pressure, label_temper, LV_ALIGN_OUT_BOTTOM_MID, 0, 30);   //设置对齐
     
     label_humidity = lv_label_create(cont, NULL);																   //创建温度标签
-	lv_obj_set_style_local_text_font(label_humidity, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_32); //设置字体20号
+	lv_obj_set_style_local_text_font(label_humidity, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_20); //设置字体20号
 	lv_obj_set_style_local_text_color(label_humidity, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_CYAN);		   //设置字体颜色
 	lv_label_set_static_text(label_humidity, humidity_text);    //设置为静态字符串
-	lv_obj_align(label_humidity, label_pressure, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);   //设置对齐
+	lv_obj_align(label_humidity, label_pressure, LV_ALIGN_OUT_BOTTOM_MID, 0, 30);   //设置对齐
+	
 
 }
 

@@ -9,13 +9,15 @@
 *******************************************************************************/
 void i2c_Start(void)
 {
-    SDA_OUT();  
+    SDA_OUT();
+    delay_us(5);  
     I2C_SDA_UP;
     I2C_SCL_UP;
-    delay_us(4);
+    delay_us(5);
     I2C_SDA_LOW;        //启动开始信号
-    delay_us(4);
+    delay_us(5);
     I2C_SCL_LOW;      //钳住I2C总线，准备发送或接收数据
+    //开始信号后sck以及sda均为低
 }
 
 
@@ -27,13 +29,14 @@ void i2c_Start(void)
 *******************************************************************************/
 void i2c_Stop(void)
 {
+    delay_us(10);
     SDA_OUT();            //sda线输出
-    I2C_SDA_LOW;         //发送结束条件的数据信号
+    //I2C_SDA_LOW;         //发送结束条件的数据信号
     I2C_SCL_UP;         //拉高时钟信号
-    delay_us(4);         //结束条件建立时间大于4μ
+    delay_us(5);         //结束条件建立时间大于4μ
     I2C_SDA_UP;         //发送I2C总线结束信号 scl为高时sda有个上升沿
     delay_us(4);
-    I2C_SCL_LOW; 
+    //I2C_SCL_LOW;        //为什么要拉低？
 }
 
 
@@ -46,23 +49,24 @@ void i2c_Stop(void)
 void i2c_SendByte(uint8_t dat)
 {
 
-     unsigned char temp;
-     SDA_OUT();
-   for(temp=0x80;temp!=0;temp>>=1)
-   {
-       if((temp & dat)== 0)
-       {
-          I2C_SDA_LOW;
-       }
-       else
-       {
-          I2C_SDA_UP;
-       }
-       delay_us(1);
-       I2C_SCL_UP;
-       delay_us(4);
-       I2C_SCL_LOW;
-   }
+   	int8_t i;
+	
+	for (i=7; i>=0; i--) 
+	{            
+		if ((dat>>i)&0x01) 
+		{               
+			I2C_SDA_UP;	              
+		}
+		else 
+		{ 
+			I2C_SDA_LOW;	
+		}
+	delay_us(10);//(20);		//5
+	I2C_SCL_UP;
+	delay_us(2);//(40);		//10
+	I2C_SCL_LOW;
+	delay_us(2);//(20);		//5  //上升沿传输数据，回到低电平数据变化                    
+	}
 }
 
 
@@ -77,8 +81,8 @@ void i2c_init(void)
     GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_HIGH;
     
     HAL_GPIO_Init(GPIOA,&GPIO_InitStruct);
-    
-	i2c_Stop();
+    I2C_SDA_UP;         //发送结束条件的数据信号
+    I2C_SCL_UP; 
 }
 
 
@@ -95,10 +99,12 @@ uint8_t i2c_ReadByte(void)
    unsigned char dat;
    I2C_SDA_UP;                     //释放总线准备接收
    SDA_IN();
+   delay_us(2);  
+   I2C_SCL_UP;
    for(temp=0x80;temp!=0;temp>>=1)//0x80:1000 0000 逐位右移在函数中挨个比较1
    {
-      delay_us(1);
-      I2C_SCL_UP;
+        I2C_SCL_UP;
+      delay_us(2);
       if(I2C_SDA==1)
       {
          dat|=temp;   //位或，dat初始任意，与1位或保留自身 sda读取到1则保留自身
@@ -107,8 +113,20 @@ uint8_t i2c_ReadByte(void)
       {
          dat&=~temp; //sda读取到0则与0111 1111 做位与，其他位不变，第一位值零
       }
+
+      delay_us(5);
       I2C_SCL_LOW;
+      delay_us(5);
    }
+    /*SDA_OUT();
+    I2C_SDA_UP;
+    delay_us(5);
+    I2C_SCL_UP;
+    delay_us(5);
+    I2C_SCL_LOW;
+    delay_us(2);
+    */
+   //I2C_SCL_LOW;
    return dat;
 }
 
@@ -124,10 +142,9 @@ uint8_t i2c_WaitAck(void)
     
     uint8_t con=0;
     
-    I2C_SDA_UP;       //释放数据线，准备接收应答
-    delay_us(1);
-    I2C_SCL_UP;                //CPU驱动SCL = 1, 此时器件会返回ACK应答
-    SDA_IN(); 
+    SDA_IN();      //释放数据线，准备接收应答
+    delay_us(5);
+    I2C_SCL_UP;                //CPU驱动SCL = 1, 此时器件会返回ACK应答 
     delay_us(1);
     
   while(I2C_SDA)    //CPU读取SDA口线状态
@@ -135,13 +152,15 @@ uint8_t i2c_WaitAck(void)
         con++;
 		if(con>254)//八位无符号整数最大为255，不能设置为大于255
         {
-            i2c_Stop();
+            i2c_Stop();     //无响应两者都拉高
       		return 1;     //无应答信号
         }
   }
 
-  I2C_SCL_LOW; 
-  delay_us(1);
+  I2C_SCL_LOW; //成功两者都为低电平
+  delay_us(10);
+  SDA_OUT();
+  I2C_SDA_LOW;
   return 0;             //有应答
 }
 
@@ -157,7 +176,7 @@ void i2c_Ack(void)
     I2C_SDA_LOW;
     delay_us(1);
     I2C_SCL_UP;            //CPU产生1个时钟
-    delay_us(4);         //时钟低电平周期大于4μ
+    delay_us(5);         //时钟低电平周期大于4μ
     I2C_SCL_LOW;         //清时钟线，钳住I2C总线以便继续接收
     delay_us(4);
     I2C_SDA_UP;            //CPU释放SDA总线
@@ -176,7 +195,7 @@ void i2c_No_Ack(void)
    I2C_SDA_UP;
    delay_us(1);
    I2C_SCL_UP;
-   delay_us(4);
+   delay_us(5);
    I2C_SCL_LOW; 
    delay_us(4);
 }
@@ -213,7 +232,7 @@ void SDA_IN(void)
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_InitStruct.Pin = GPIO_PIN_8;                 
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH; 
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 } 

@@ -1,6 +1,6 @@
 #ifndef _I2C_H_
 #define _I2C_H_
-
+//#include "simulate_iic.h"
 #include "sys.h"
 
 #define I2C1_GPIO_RCC_ENABLE() __HAL_RCC_GPIOB_CLK_ENABLE()
@@ -17,6 +17,54 @@
 
 
 
+
+
+/*
+static void _i2c_delay(void)
+{
+    delay_us(5);
+}
+
+static void _i2c_scl_out(uint8_t value)
+{
+  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_9,value);
+}
+
+static void _i2c_sda_dir(uint8_t value)
+{
+    if (value) {
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = GPIO_PIN_8;                
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    }
+     else
+      {
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = GPIO_PIN_8;                 
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH; 
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+      }
+}
+
+
+
+
+static void _i2c_sda_out(uint8_t value)
+{
+   HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,value);
+}
+
+static uint8_t _i2c_sda_in(void)
+{
+    return HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_8);
+}
+*/
+
 //定义BME使用的模拟IIC端口
 #define I2C_BME_PORT GPIOA
 #define I2C_BME_SDA GPIO_PIN_8
@@ -29,7 +77,7 @@
 
 
 #define I2C_SDA        HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_8)        //获取SDA引脚状态
-#define I2C_SCL        HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_9)        //获取SCL引脚状态 
+//#define I2C_SCL        HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_9)        //获取SCL引脚状态 
 void i2c_Start(void);              //开始信号    
 void i2c_Ack(void);                //应答信号    
 void i2c_No_Ack(void);             //非应答信号    

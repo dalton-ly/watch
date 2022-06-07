@@ -93,7 +93,7 @@ void SW_Init(void) //按键引脚初始化
 
 // bme初始化函数
 
-/*void BME280_Init()
+void BME280_Init()
 {
 	int8_t rslt = BME280_OK;
 	uint8_t dev_addr = BME280_I2C_ADDR_PRIM;
@@ -104,7 +104,7 @@ void SW_Init(void) //按键引脚初始化
 	dev.delay_us = user_delay_us;
 	rslt = bme280_init(&dev);
 }
-*/
+
 
 int main(void)
 {
@@ -123,13 +123,12 @@ int main(void)
 	HRS_I2C_INIT();
 	EM7028_hrs_init();	//心率获取初始化
 	EM7028_hrs_get_data();
-	//i2c_init();
-	// BME280_Init();
+	i2c_init();
+	BME280_Init();
 	LVGL_Timer_Init(); //初始化LVGL的心跳定时器
 
 	lv_init();			 // lvgl 系统初始化
 	lv_port_disp_init(); // lvgl 显示接口初始化,放在 lv_init()的后面
-	//app_humidity_create();
 	OSInit(&err);		 //初始化UCOSIII
 	OS_CRITICAL_ENTER(); //进入临界区
 	//创建开始任务
@@ -397,6 +396,7 @@ void lvgl_task(void *p_arg)
 	app_compass_create();		//创建"指南针"界面
 	app_humidity_create();		//创建气压温度界面
 	app_heartrate_create();		//创建心率界面
+	//stream_sensor_data_normal_mode(&dev,&bmedata);
 	ag_t = Get_Angle_GyroxStructure();
 	APP_TaskCreate(); //创建一些任务
 
@@ -590,7 +590,8 @@ void humidity_task(void* p_arg)
 	while(1)
 	{
 	OS_CRITICAL_ENTER();
-	//stream_sensor_data_normal_mode(&dev,&bmedata);	
+	stream_sensor_data_normal_mode(&dev,&bmedata);
+	app_update_humidity(bmedata);	
 	OS_CRITICAL_EXIT(); //退出临界区
 	OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &err); //延时200ms
 	}
@@ -632,6 +633,7 @@ static void move_task_menu_change_display(Display_TypeDef disp_t)
 		break;
 	case Disp_Humidity:
 		app_humidity_anim_Vexit(false);//显示温湿度气压信息
+		OSTaskResume((OS_TCB *)&HumidityTaskTCB, &err);
 		break;
 	case Disp_Heartrate:
 		app_heartrate_anim_Vexit(false);
@@ -782,12 +784,14 @@ static void move_task_compass(Move_DirTypeDef dir)
 
 static void move_task_humidity(Move_DirTypeDef dir)
 {
+	OS_ERR err;
 	switch (dir)
 	{
 	case MOVE_LEFT:
 		Disp = Disp_Menu;
 		app_humidity_anim_Vexit(true);		//将about界面退出
 		app_menu_anim_Hexit(id, false); //移入菜单界面
+		OS_TaskSuspend((OS_TCB*)&HumidityTaskTCB,&err);
 		break;
 	default:
 		break;

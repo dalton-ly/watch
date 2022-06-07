@@ -13,7 +13,7 @@
  *   Modification: Created file
  */
 
-#include "simulate_i2c.h"
+#include "simulate_iic.h"
 
 /**
  * @brief Start signal

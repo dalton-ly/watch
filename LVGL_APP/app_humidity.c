@@ -2,7 +2,6 @@
 #include  "app_anim.h"
 #include "BME280.h"
 
-extern struct bme280_data bmedata;
 
 static lv_obj_t* cont;  // 界面容器
 static lv_obj_t* label_temper;  //温度标签
@@ -34,24 +33,29 @@ void app_humidity_create() //创建气压温度界面
 	label_temper = lv_label_create(cont, NULL);																   //创建温度标签
 	lv_obj_set_style_local_text_font(label_temper, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_20); //设置字体20号
 	lv_obj_set_style_local_text_color(label_temper, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_CYAN);		   //设置字体颜色
-	lv_label_set_text_static(label_temper,temper_text);    //
-	lv_obj_align(label_temper, NULL, LV_ALIGN_IN_TOP_MID, 0, 10);   //设置对齐
+	//lv_label_set_text_static(label_temper,temper_text);    //
+	lv_obj_align(label_temper, NULL, LV_ALIGN_IN_TOP_MID, 0, 30);   //设置对齐
 
     label_pressure = lv_label_create(cont, NULL);																   //创建温度标签
 	lv_obj_set_style_local_text_font(label_pressure, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_20); //设置字体20号
 	lv_obj_set_style_local_text_color(label_pressure, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_CYAN);		   //设置字体颜色
-	lv_label_set_static_text(label_pressure, pressure_text);    //设置为静态字符串
+	//lv_label_set_static_text(label_pressure, pressure_text);    //设置为静态字符串
 	lv_obj_align(label_pressure, label_temper, LV_ALIGN_OUT_BOTTOM_MID, 0, 30);   //设置对齐
     
     label_humidity = lv_label_create(cont, NULL);																   //创建温度标签
 	lv_obj_set_style_local_text_font(label_humidity, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_20); //设置字体20号
 	lv_obj_set_style_local_text_color(label_humidity, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_CYAN);		   //设置字体颜色
-	lv_label_set_static_text(label_humidity, humidity_text);    //设置为静态字符串
+	//lv_label_set_static_text(label_humidity, humidity_text);    //设置为静态字符串
 	lv_obj_align(label_humidity, label_pressure, LV_ALIGN_OUT_BOTTOM_MID, 0, 30);   //设置对齐
 	
 
 }
-
+void app_update_humidity(struct bme280_data bmedata)
+{
+	lv_label_set_text_fmt(label_temper,"temper:%f",bmedata.temperature);
+	lv_label_set_text_fmt(label_humidity,"humidity:%f",bmedata.humidity);
+	lv_label_set_text_fmt(label_pressure,"pressure:%f",bmedata.pressure);
+}
 void app_humidity_anim_Vexit(bool dir)
 {
 	uint16_t start;

@@ -577,7 +577,6 @@ int8_t bme280_set_sensor_settings(uint8_t desired_settings, struct bme280_dev *d
     if (rslt == BME280_OK)
     {
         rslt = bme280_get_sensor_mode(&sensor_mode, dev);
-
         if ((rslt == BME280_OK) && (sensor_mode != BME280_SLEEP_MODE))
         {
             rslt = put_device_to_sleep(dev);
@@ -1609,7 +1608,7 @@ int8_t user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *in
 	i2c_Start();
 	
 	/* 第2步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
-	i2c_SendByte(BME280_I2C_ADDR_PRIM | 0);	/* 此处是写指令 */
+	i2c_SendByte((BME280_I2C_ADDR_PRIM <<1)| 0);	/* 此处是写指令 */
 	
 	/* 第3步：等待ACK */
 	while (i2c_WaitAck() != 0);
@@ -1624,20 +1623,20 @@ int8_t user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *in
 	i2c_Start();
 	
 	/* 第7步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
-	i2c_SendByte(BME280_I2C_ADDR_PRIM | 1);	/* 此处是读指令 */
+	i2c_SendByte((BME280_I2C_ADDR_PRIM<<1) | 1);	/* 此处是读指令 */
 	
 	/* 第8步：发送ACK */
 	while (i2c_WaitAck() != 0);
-	
+	//有应答两者都为低电平
 	/* 第9步：循环读取数据 */
 	for (i = 0; i < len; i++)
 	{
 		reg_data[i] = i2c_ReadByte();	/* 读1个字节 */
-		
+		//接受完sck低，sda高
 		/* 每读完1个字节后，需要发送Ack， 最后一个字节不需要Ack，发Nack */
 		if (i != len - 1)
 		{
-			i2c_Ack();	/* 中间字节读完后，CPU产生ACK信号(驱动SDA = 0) */
+			i2c_Ack();	/* 中间字节读完后，CPU产生ACK信号(驱动SDA = 0) */ //应答后sda高，scl低
 		}
 		else
 		{
@@ -1646,7 +1645,7 @@ int8_t user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *in
 	}
 	/* 发送I2C总线停止信号 */
 	i2c_Stop();
-    rslt=1;	/* 执行成功 */
+    rslt=0;	/* 执行成功 */
 /*
 cmd_fail: // 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 
 	i2c_Stop();
@@ -1682,13 +1681,15 @@ int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, v
     int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
 /* 第1步：发起I2C总线启动信号 */
 	i2c_Start();
-	
+	//开始后两者都为低电平
 	/* 第2步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
-	i2c_SendByte(BME280_I2C_ADDR_PRIM | 0);	/* 此处是写指令 */
+	i2c_SendByte((BME280_I2C_ADDR_PRIM<<1) | 0);	/* 此处是写指令 */
 	
+    //发送后sda不定，scl为低电平
+
 	/* 第3步：发送一个时钟，判断器件是否正确应答 */
 	while(i2c_WaitAck() != 0);
-	
+	//有应答则两者都为低，否则两个都为高 sda设置为输出
 	while(len--)
 	{	
 		/* 第4步：发送字节地址，24C02只有256字节，因此1个字节就够了，如果是24C04以上，那么此处需要连发多个地址 */
@@ -1705,7 +1706,7 @@ int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, v
 	}
 	/* 命令执行成功，发送I2C总线停止信号 */
 	i2c_Stop();
-    rslt=1;
+    rslt=0;
 	return rslt;
 
 /*写时序的具体步骤：
@@ -1747,31 +1748,29 @@ int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, v
 int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev, struct bme280_data* comp_data)//普通模式下读取数据
 //传入的结构变量来保存数据用于输出
 {
-	int8_t rslt;
-	uint8_t settings_sel;
-	//struct bme280_data comp_data;
+	 int8_t rslt;
+    uint8_t settings_sel;
+    //struct bme280_data comp_data1;
 
-	/* Recommended mode of operation: Indoor navigation */
-	dev->settings.osr_h = BME280_OVERSAMPLING_1X;
-	dev->settings.osr_p = BME280_OVERSAMPLING_16X;
-	dev->settings.osr_t = BME280_OVERSAMPLING_2X;
-	dev->settings.filter = BME280_FILTER_COEFF_16;
-	dev->settings.standby_time = BME280_STANDBY_TIME_62_5_MS;
+    /* Recommended mode of operation: Indoor navigation */
+    dev->settings.osr_h = BME280_OVERSAMPLING_1X;
+    dev->settings.osr_p = BME280_OVERSAMPLING_16X;
+    dev->settings.osr_t = BME280_OVERSAMPLING_2X;
+    dev->settings.filter = BME280_FILTER_COEFF_16;
 
-	settings_sel = BME280_OSR_PRESS_SEL;
-	settings_sel |= BME280_OSR_TEMP_SEL;
-	settings_sel |= BME280_OSR_HUM_SEL;
-	settings_sel |= BME280_STANDBY_SEL;
-	settings_sel |= BME280_FILTER_SEL;
-	rslt = bme280_set_sensor_settings(settings_sel, dev);
-	rslt = bme280_set_sensor_mode(BME280_NORMAL_MODE, dev);
+    settings_sel = BME280_OSR_PRESS_SEL | BME280_OSR_TEMP_SEL | BME280_OSR_HUM_SEL | BME280_FILTER_SEL;
 
-	//printf("Temperature, Pressure, Humidity\r\n");
-	while (1) {
-		/* Delay while the sensor completes a measurement */
-		dev->delay_us(70000, dev->intf_ptr);
-		rslt = bme280_get_sensor_data(BME280_ALL, comp_data, dev);//原本传入指针去除掉&
-		//print_sensor_data(&comp_data);
-	}
-	return rslt;
+    rslt = bme280_set_sensor_settings(settings_sel, dev);
+
+    rslt = bme280_set_sensor_mode(BME280_FORCED_MODE, dev);
+
+        /* Wait for the measurement to complete and print data @25Hz */
+     dev->delay_us(40000, dev->intf_ptr);
+     rslt = bme280_get_sensor_data(BME280_ALL, comp_data, dev);
+
+        //print_sensor_data(&comp_data);
+      dev->delay_us(1000000, dev->intf_ptr);
+    
+
+    return rslt;
 }

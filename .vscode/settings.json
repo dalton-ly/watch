@@ -15,6 +15,7 @@
         "app_about.h": "c",
         "app_humidity.h": "c",
         "bme280_defs.h": "c",
-        "app_heartrate.h": "c"
+        "app_heartrate.h": "c",
+        "simulate_iic.h": "c"
     }
 }

@@ -1764,13 +1764,8 @@ int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev, struct bme280_data
 
     rslt = bme280_set_sensor_mode(BME280_FORCED_MODE, dev);
 
-        /* Wait for the measurement to complete and print data @25Hz */
      dev->delay_us(40000, dev->intf_ptr);
      rslt = bme280_get_sensor_data(BME280_ALL, comp_data, dev);
-
-        //print_sensor_data(&comp_data);
-      dev->delay_us(1000000, dev->intf_ptr);
-    
-
+    dev->delay_us(1000000, dev->intf_ptr);
     return rslt;
 }

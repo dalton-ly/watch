@@ -44,3 +44,17 @@ JLinkLog.txt
 
 # Other Files
 *._2i
+LVGL_APP/.app_menu_BASE_863.c.swp
+LVGL_APP/.app_menu_LOCAL_863.c.swp
+LVGL_APP/.app_menu_REMOTE_863.c.swp
+LVGL_APP/.app_menu.c.swp
+LVGL_APP/app_menu_BACKUP_497.c
+LVGL_APP/app_menu_BASE_863.c
+LVGL_APP/app_menu_LOCAL_863.c
+LVGL_APP/app_menu_REMOTE_497.c
+USER/RTE/_UCOSIII/RTE_Components.h
+LVGL_APP/app_menu_REMOTE_863.c
+LVGL_APP/app_menu_LOCAL_497.c
+LVGL_APP/app_menu_BASE_497.c
+LVGL_APP/app_menu_BACKUP_863.c
+CORE/cmsis_armclang.h

@@ -531,14 +531,12 @@ void heart_task(void *p_arg) //在进入界面解挂时开始调用
 	OSTmrStart(&heartrate_get_data,&err);	
 	while (1)
 	{
-		OS_CRITICAL_ENTER();
 		//if (heart_tmp != heart_data && heart_data != 0) //心率有变化时更新数据
 		//{
 			app_heartrate_update(heart_data);
 		//	heart_tmp = heart_data;
 		//}
-		OS_CRITICAL_EXIT();
-		OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &err);
+		OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
 	}
 }
 
@@ -589,11 +587,12 @@ void humidity_task(void* p_arg)
 
 	while(1)
 	{
-	OS_CRITICAL_ENTER();
+	
 	stream_sensor_data_normal_mode(&dev,&bmedata);
-	app_update_humidity(bmedata);	
+	OS_CRITICAL_ENTER();
+	app_update_humidity(&bmedata);	
 	OS_CRITICAL_EXIT(); //退出临界区
-	OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &err); //延时200ms
+	OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err); //延时200ms
 	}
 }
 

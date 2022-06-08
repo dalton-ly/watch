@@ -37,28 +37,9 @@ void app_heartrate_create(void)
 	lv_obj_align(label_data, label_hr, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);													//设置标签对齐
 	lv_obj_set_auto_realign(label_data, true);	
 }
-// static int dec_get_bits(int dec)
-// {
-// 	int i = 0;
-
-// 	if (dec == 0)
-// 		return 1;
-
-// 	while (dec)
-// 	{
-// 		i++;
-// 		dec /= 10;
-// 	}
-
-// 	return i;
-// }
 
 void app_heartrate_update(unsigned int data) //更新心率数据并显示
 {
-
-	//sprintf(display_text,"Hr:%d",data);
-	//app_heartrate_anim_Vexit(true); //将界面退出
-	//lv_label_set_static_text(label_data,display_text);
 	lv_label_set_text_fmt(label_data, "Hr:%d",data); //设置显示文本: 角度
 }
 

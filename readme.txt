@@ -1,1 +1,3 @@
-字体编码格式采用UTF-8，如果keil的编码格式若不是UTF-8打开会乱码。
+工程应用训练软件部分
+硬件部分以及其他资料：链接：https://pan.baidu.com/s/11Z7zfY3LfduHxFsyGRVxWg 
+提取码：4170
